@@ -2,12 +2,14 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { SendHorizontal, UserCircle2, Bot, MoonStar, SunMedium, Edit2, Trash2, Check, X } from "lucide-react";
+import { SendHorizontal, UserCircle2, Bot, MoonStar, SunMedium, Edit2, Trash2, Check, X, Smile, ThumbsUp, ThumbsDown, Eraser } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTheme } from 'next-themes';
 import { format } from 'date-fns';
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Textarea } from "@/components/ui/textarea";
+import { Tooltip } from "@/components/ui/tooltip";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 
 const ChatMessage = ({ message, isUser, onEdit, onDelete }) => {
   const { theme } = useTheme();
