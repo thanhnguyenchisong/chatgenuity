@@ -139,7 +139,7 @@ const Chat = () => {
   return (
     <div className={`flex flex-col h-screen ${isDark ? 'bg-gray-900' : 'bg-gray-50'}`}>
       <header className={`${isDark ? 'bg-gray-800' : 'bg-white'} shadow-md py-4 px-6 flex justify-between items-center`}>
-        <h1 className={`text-2xl font-bold ${isDark ? 'text-white' : 'text-gray-800'}`}>ChatGenuity</h1>
+        <h1 className={`text-2xl font-bold ${isDark ? 'text-white' : 'text-gray-800'}`}>Chat Bot</h1>
         <Button onClick={toggleTheme} variant="ghost" size="icon">
           {isDark ? <SunMedium className="h-5 w-5" /> : <MoonStar className="h-5 w-5" />}
         </Button>
