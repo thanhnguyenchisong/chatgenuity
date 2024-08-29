@@ -11,7 +11,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 
-const ChatMessage = ({ message, isUser, onEdit, onDelete }) => {
+const ChatMessage = ({ message, isUser, onEdit, onDelete, onLike, isLiked }) => {
   const { theme } = useTheme();
   const isDark = theme === 'dark';
   const [isEditing, setIsEditing] = useState(false);
@@ -22,21 +22,21 @@ const ChatMessage = ({ message, isUser, onEdit, onDelete }) => {
     setIsEditing(false);
   };
 
-  const ReactionButton = ({ icon: Icon, label, onClick }) => (
+  const ReactionButton = ({ icon: Icon, label, onClick, isActive }) => (
     <TooltipProvider>
       <Tooltip>
         <TooltipTrigger asChild>
           <Button
             size="icon"
             variant="ghost"
-            className="h-8 w-8 rounded-full"
+            className={`h-8 w-8 rounded-full ${isActive ? 'bg-blue-100 dark:bg-blue-900' : ''}`}
             onClick={onClick}
           >
-            <Icon className="h-4 w-4" />
+            <Icon className={`h-4 w-4 ${isActive ? 'text-blue-500' : ''}`} />
           </Button>
         </TooltipTrigger>
         <TooltipContent side="bottom" className="bg-gray-800 text-white px-2 py-1 text-xs rounded">
-          {label}
+          {isActive ? `Remove ${label.toLowerCase()}` : label}
         </TooltipContent>
       </Tooltip>
     </TooltipProvider>
@@ -75,7 +75,7 @@ const ChatMessage = ({ message, isUser, onEdit, onDelete }) => {
             {format(new Date(message.timestamp), 'HH:mm')}
           </div>
           <div className={`absolute bottom-0 left-0 transform translate-y-full mt-2 flex space-x-1 ${isUser ? 'flex-row-reverse' : 'flex-row'}`}>
-            <ReactionButton icon={ThumbsUp} label="Like" onClick={() => {}} />
+            <ReactionButton icon={ThumbsUp} label="Like" onClick={() => onLike(message.id)} isActive={isLiked} />
             <ReactionButton icon={ThumbsDown} label="Dislike" onClick={() => {}} />
             <ReactionButton icon={Smile} label="Love it!" onClick={() => {}} />
           </div>
@@ -156,9 +156,22 @@ const Chat = () => {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
   const [isTyping, setIsTyping] = useState(false);
+  const [likedMessages, setLikedMessages] = useState(new Set());
   const scrollAreaRef = useRef(null);
   const { theme, setTheme } = useTheme();
   const isDark = theme === 'dark';
+
+  const handleLike = (messageId) => {
+    setLikedMessages((prev) => {
+      const newLiked = new Set(prev);
+      if (newLiked.has(messageId)) {
+        newLiked.delete(messageId);
+      } else {
+        newLiked.add(messageId);
+      }
+      return newLiked;
+    });
+  };
 
   useEffect(() => {
     if (scrollAreaRef.current) {
@@ -217,6 +230,8 @@ const Chat = () => {
                 isUser={msg.isUser} 
                 onEdit={handleEdit}
                 onDelete={handleDelete}
+                onLike={handleLike}
+                isLiked={likedMessages.has(msg.id)}
               />
             ))}
           </AnimatePresence>
