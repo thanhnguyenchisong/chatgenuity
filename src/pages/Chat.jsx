@@ -8,7 +8,7 @@ import { useTheme } from 'next-themes';
 import { format } from 'date-fns';
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Textarea } from "@/components/ui/textarea";
-import { Tooltip } from "@/components/ui/tooltip";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 
 const ChatMessage = ({ message, isUser, onEdit, onDelete }) => {
@@ -21,6 +21,26 @@ const ChatMessage = ({ message, isUser, onEdit, onDelete }) => {
     onEdit(message.id, editedText);
     setIsEditing(false);
   };
+
+  const ReactionButton = ({ icon: Icon, label, onClick }) => (
+    <TooltipProvider>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Button
+            size="icon"
+            variant="ghost"
+            className="h-8 w-8 rounded-full"
+            onClick={onClick}
+          >
+            <Icon className="h-4 w-4" />
+          </Button>
+        </TooltipTrigger>
+        <TooltipContent side="bottom" className="bg-gray-800 text-white px-2 py-1 text-xs rounded">
+          {label}
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
+  );
 
   return (
     <motion.div
@@ -54,25 +74,66 @@ const ChatMessage = ({ message, isUser, onEdit, onDelete }) => {
           <div className={`text-xs mt-2 ${isUser ? 'text-blue-200' : isDark ? 'text-gray-400' : 'text-gray-500'}`}>
             {format(new Date(message.timestamp), 'HH:mm')}
           </div>
+          <div className={`absolute bottom-0 left-0 transform translate-y-full mt-2 flex space-x-1 ${isUser ? 'flex-row-reverse' : 'flex-row'}`}>
+            <ReactionButton icon={ThumbsUp} label="Like" onClick={() => {}} />
+            <ReactionButton icon={ThumbsDown} label="Dislike" onClick={() => {}} />
+            <ReactionButton icon={Smile} label="Love it!" onClick={() => {}} />
+          </div>
           {isUser && (
             <div className={`absolute top-2 right-2 space-x-2 opacity-0 group-hover:opacity-100 transition-opacity`}>
               {isEditing ? (
                 <>
-                  <Button size="icon" variant="ghost" onClick={handleEdit}>
-                    <Check className="h-4 w-4" />
-                  </Button>
-                  <Button size="icon" variant="ghost" onClick={() => setIsEditing(false)}>
-                    <X className="h-4 w-4" />
-                  </Button>
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button size="icon" variant="ghost" onClick={handleEdit}>
+                          <Check className="h-4 w-4" />
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent side="bottom" className="bg-gray-800 text-white px-2 py-1 text-xs rounded">
+                        Save changes
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button size="icon" variant="ghost" onClick={() => setIsEditing(false)}>
+                          <X className="h-4 w-4" />
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent side="bottom" className="bg-gray-800 text-white px-2 py-1 text-xs rounded">
+                        Cancel editing
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
                 </>
               ) : (
                 <>
-                  <Button size="icon" variant="ghost" onClick={() => setIsEditing(true)}>
-                    <Edit2 className="h-4 w-4" />
-                  </Button>
-                  <Button size="icon" variant="ghost" onClick={() => onDelete(message.id)}>
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button size="icon" variant="ghost" onClick={() => setIsEditing(true)}>
+                          <Edit2 className="h-4 w-4" />
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent side="bottom" className="bg-gray-800 text-white px-2 py-1 text-xs rounded">
+                        Edit message
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button size="icon" variant="ghost" onClick={() => onDelete(message.id)}>
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent side="bottom" className="bg-gray-800 text-white px-2 py-1 text-xs rounded">
+                        Delete message
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
                 </>
               )}
             </div>
