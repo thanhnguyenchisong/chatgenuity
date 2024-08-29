@@ -11,7 +11,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 
-const ChatMessage = ({ message, isUser, onEdit, onDelete, onLike, isLiked }) => {
+const ChatMessage = ({ message, isUser, onEdit, onDelete, onReaction, reactions }) => {
   const { theme } = useTheme();
   const isDark = theme === 'dark';
   const [isEditing, setIsEditing] = useState(false);
@@ -75,9 +75,24 @@ const ChatMessage = ({ message, isUser, onEdit, onDelete, onLike, isLiked }) => 
             {format(new Date(message.timestamp), 'HH:mm')}
           </div>
           <div className={`absolute bottom-0 left-0 transform translate-y-full mt-2 flex space-x-1 ${isUser ? 'flex-row-reverse' : 'flex-row'}`}>
-            <ReactionButton icon={ThumbsUp} label="Like" onClick={() => onLike(message.id)} isActive={isLiked} />
-            <ReactionButton icon={ThumbsDown} label="Dislike" onClick={() => {}} />
-            <ReactionButton icon={Smile} label="Love it!" onClick={() => {}} />
+            <ReactionButton 
+              icon={ThumbsUp} 
+              label="Like" 
+              onClick={() => onReaction(message.id, 'like')} 
+              isActive={reactions.like} 
+            />
+            <ReactionButton 
+              icon={ThumbsDown} 
+              label="Dislike" 
+              onClick={() => onReaction(message.id, 'dislike')} 
+              isActive={reactions.dislike} 
+            />
+            <ReactionButton 
+              icon={Smile} 
+              label="Love it!" 
+              onClick={() => onReaction(message.id, 'love')} 
+              isActive={reactions.love} 
+            />
           </div>
           {isUser && (
             <div className={`absolute top-2 right-2 space-x-2 opacity-0 group-hover:opacity-100 transition-opacity`}>
@@ -156,21 +171,27 @@ const Chat = () => {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
   const [isTyping, setIsTyping] = useState(false);
-  const [likedMessages, setLikedMessages] = useState(new Set());
+  const [reactions, setReactions] = useState({});
   const scrollAreaRef = useRef(null);
   const { theme, setTheme } = useTheme();
   const isDark = theme === 'dark';
 
-  const handleLike = (messageId) => {
-    setLikedMessages((prev) => {
-      const newLiked = new Set(prev);
-      if (newLiked.has(messageId)) {
-        newLiked.delete(messageId);
-      } else {
-        newLiked.add(messageId);
-      }
-      return newLiked;
+  const handleReaction = (messageId, reactionType) => {
+    setReactions((prev) => {
+      const messageReactions = prev[messageId] || {};
+      const updatedReactions = {
+        ...prev,
+        [messageId]: {
+          ...messageReactions,
+          [reactionType]: !messageReactions[reactionType]
+        }
+      };
+      return updatedReactions;
     });
+  };
+
+  const isReactionActive = (messageId, reactionType) => {
+    return reactions[messageId]?.[reactionType] || false;
   };
 
   useEffect(() => {
@@ -230,8 +251,12 @@ const Chat = () => {
                 isUser={msg.isUser} 
                 onEdit={handleEdit}
                 onDelete={handleDelete}
-                onLike={handleLike}
-                isLiked={likedMessages.has(msg.id)}
+                onReaction={(messageId, reactionType) => handleReaction(messageId, reactionType)}
+                reactions={{
+                  like: isReactionActive(msg.id, 'like'),
+                  dislike: isReactionActive(msg.id, 'dislike'),
+                  love: isReactionActive(msg.id, 'love')
+                }}
               />
             ))}
           </AnimatePresence>
