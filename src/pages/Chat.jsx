@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Send, User, Bot, Moon, Sun } from "lucide-react";
+import { SendHorizontal, UserCircle2, Bot, MoonStar, SunMedium } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTheme } from 'next-themes';
 
@@ -20,7 +20,7 @@ const ChatMessage = ({ message, isUser }) => {
     >
       <div className={`flex items-end space-x-2 ${isUser ? 'flex-row-reverse' : 'flex-row'}`}>
         <div className={`w-10 h-10 rounded-full flex items-center justify-center ${isUser ? 'bg-blue-500' : isDark ? 'bg-gray-600' : 'bg-gray-300'}`}>
-          {isUser ? <User className="w-6 h-6 text-white" /> : <Bot className={`w-6 h-6 ${isDark ? 'text-gray-300' : 'text-gray-600'}`} />}
+          {isUser ? <UserCircle2 className="w-6 h-6 text-white" /> : <Bot className={`w-6 h-6 ${isDark ? 'text-gray-300' : 'text-gray-600'}`} />}
         </div>
         <div className={`max-w-[70%] p-4 rounded-2xl shadow-md ${
           isUser 
@@ -69,7 +69,7 @@ const Chat = () => {
       <header className={`${isDark ? 'bg-gray-800' : 'bg-white'} shadow-md py-4 px-6 flex justify-between items-center`}>
         <h1 className={`text-2xl font-bold ${isDark ? 'text-white' : 'text-gray-800'}`}>ChatGenuity</h1>
         <Button onClick={toggleTheme} variant="ghost" size="icon">
-          {isDark ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
+          {isDark ? <SunMedium className="h-5 w-5" /> : <MoonStar className="h-5 w-5" />}
         </Button>
       </header>
       <div className="flex-1 p-4 overflow-hidden">
@@ -91,7 +91,7 @@ const Chat = () => {
             className={`flex-grow ${isDark ? 'bg-gray-700 text-white' : 'bg-white text-gray-800'}`}
           />
           <Button onClick={handleSend} className="bg-blue-500 hover:bg-blue-600 text-white">
-            <Send className="h-4 w-4 mr-2" />
+            <SendHorizontal className="h-4 w-4 mr-2" />
             Send
           </Button>
         </div>
