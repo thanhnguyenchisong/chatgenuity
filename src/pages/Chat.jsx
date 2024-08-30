@@ -1,15 +1,12 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { SendHorizontal, UserCircle2, Bot, MoonStar, SunMedium, Edit2, Trash2, Check, X, Smile, ThumbsUp, ThumbsDown, Eraser } from "lucide-react";
+import { SendHorizontal, UserCircle2, Bot, MoonStar, SunMedium, Edit2, Trash2, Check, X, Smile, ThumbsUp, ThumbsDown } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTheme } from 'next-themes';
 import { format } from 'date-fns';
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Textarea } from "@/components/ui/textarea";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 
 const ChatMessage = ({ message, isUser, onEdit, onDelete, onReaction, reactions }) => {
   const { theme } = useTheme();
@@ -265,12 +262,13 @@ const Chat = () => {
       </div>
       <div className={`p-4 ${isDark ? 'bg-gray-800' : 'bg-white'} border-t ${isDark ? 'border-gray-700' : 'border-gray-200'}`}>
         <div className="flex space-x-2 max-w-4xl mx-auto">
-          <Input
+          <Textarea
             value={input}
             onChange={(e) => setInput(e.target.value)}
             placeholder="Type your message..."
             onKeyPress={(e) => e.key === 'Enter' && !e.shiftKey && handleSend()}
             className={`flex-grow ${isDark ? 'bg-gray-700 text-white' : 'bg-white text-gray-800'}`}
+            rows={1}
           />
           <Button onClick={handleSend} className="bg-blue-500 hover:bg-blue-600 text-white">
             <SendHorizontal className="h-4 w-4 mr-2" />
