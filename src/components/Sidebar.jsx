@@ -1,40 +1,67 @@
 import React, { useState } from 'react';
 import { Button } from './ui/button';
-import { PlusCircle, Menu, Edit2, Check } from 'lucide-react';
-import { Sheet, SheetContent, SheetTrigger } from './ui/sheet';
 import { Input } from './ui/input';
+import { PlusCircle, Menu, MoreVertical, Check, X } from 'lucide-react';
+import { Sheet, SheetContent, SheetTrigger } from './ui/sheet';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "./ui/dropdown-menu";
 
-const Sidebar = ({ chats, currentChatId, setCurrentChatId, addNewChat, editingChatId, setEditingChatId, handleChatNameEdit }) => {
+const Sidebar = ({ chats, currentChatId, setCurrentChatId, addNewChat, editingChatId, setEditingChatId, handleChatNameEdit, removeChat }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [editedTitle, setEditedTitle] = useState('');
 
+  const handleNewChat = () => {
+    addNewChat();
+  };
+
+  const handleRenameSubmit = (chatId) => {
+    handleChatNameEdit(chatId, editedTitle);
+    setEditingChatId(null);
+  };
+
+  const handleRenameCancel = () => {
+    setEditingChatId(null);
+  };
+
   const ChatList = () => (
     <>
-      <Button onClick={addNewChat} className="mb-4 w-full">
+      <Button onClick={handleNewChat} className="mb-4 w-full">
         <PlusCircle className="mr-2 h-4 w-4" /> New Chat
       </Button>
       <div className="flex-1 overflow-y-auto">
         {chats.map((chat) => (
           <div key={chat.id} className="flex items-center mb-2">
             {editingChatId === chat.id ? (
-              <form onSubmit={(e) => {
-                e.preventDefault();
-                handleChatNameEdit(chat.id, editedTitle);
-              }} className="flex w-full">
+              <div className="flex items-center w-full">
                 <Input
                   value={editedTitle}
                   onChange={(e) => setEditedTitle(e.target.value)}
                   className="mr-2"
+                  autoFocus
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      handleRenameSubmit(chat.id);
+                    } else if (e.key === 'Escape') {
+                      handleRenameCancel();
+                    }
+                  }}
                 />
-                <Button type="submit" size="icon" variant="ghost">
+                <Button size="icon" onClick={() => handleRenameSubmit(chat.id)}>
                   <Check className="h-4 w-4" />
                 </Button>
-              </form>
+                <Button size="icon" variant="ghost" onClick={handleRenameCancel}>
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
             ) : (
               <>
                 <Button
                   variant={chat.id === currentChatId ? 'secondary' : 'ghost'}
-                  className="flex-grow justify-start"
+                  className={`flex-grow justify-start ${chat.id === currentChatId ? 'bg-gray-200 dark:bg-gray-700' : ''}`}
                   onClick={() => {
                     setCurrentChatId(chat.id);
                     setIsMobileMenuOpen(false);
@@ -42,16 +69,24 @@ const Sidebar = ({ chats, currentChatId, setCurrentChatId, addNewChat, editingCh
                 >
                   {chat.title}
                 </Button>
-                <Button
-                  size="icon"
-                  variant="ghost"
-                  onClick={() => {
-                    setEditingChatId(chat.id);
-                    setEditedTitle(chat.title);
-                  }}
-                >
-                  <Edit2 className="h-4 w-4" />
-                </Button>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="icon">
+                      <MoreVertical className="h-4 w-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent>
+                    <DropdownMenuItem onSelect={() => {
+                      setEditingChatId(chat.id);
+                      setEditedTitle(chat.title);
+                    }}>
+                      Rename
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onSelect={() => removeChat(chat.id)}>
+                      Delete
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </>
             )}
           </div>

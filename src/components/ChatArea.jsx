@@ -8,19 +8,21 @@ const ChatArea = ({ chat, updateChat }) => {
   const [isTyping, setIsTyping] = useState(false);
 
   const addMessage = (content, isUser = true) => {
+    if (!chat) return; // Add this check
     const newMessage = { id: Date.now(), content, isUser, reaction: null };
-    updateChat([...chat.messages, newMessage]);
+    updateChat([...(chat.messages || []), newMessage]);
     if (isUser) {
       setIsTyping(true);
       setTimeout(() => {
         const botResponse = { id: Date.now() + 1, content: "This is a fake response from the AI.", isUser: false, reaction: null };
-        updateChat([...chat.messages, newMessage, botResponse]);
+        updateChat([...(chat.messages || []), newMessage, botResponse]);
         setIsTyping(false);
       }, 2000);
     }
   };
 
   const handleReaction = (messageId, reaction) => {
+    if (!chat) return; // Add this check
     updateChat(chat.messages.map(message => 
       message.id === messageId 
         ? { ...message, reaction: message.reaction === reaction ? null : reaction }
@@ -28,11 +30,15 @@ const ChatArea = ({ chat, updateChat }) => {
     ));
   };
 
+  if (!chat) {
+    return <div className="flex-1 flex items-center justify-center">No chat selected</div>;
+  }
+
   return (
     <div className="flex-1 flex flex-col p-4 overflow-hidden">
       <div className="flex-1 overflow-y-auto mb-4">
         <AnimatePresence>
-          {chat.messages.map((message) => (
+          {chat.messages && chat.messages.map((message) => (
             <motion.div
               key={message.id}
               initial={{ opacity: 0, y: 20 }}
