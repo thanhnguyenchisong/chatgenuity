@@ -2,9 +2,9 @@
 
 ## Project info
 
-**Project**: chatwhirl
+**Project**: chatgenuity
 
-**URL**: https://run.gptengineer.app/projects/f50ee67b-9bf8-463b-91ba-1cf36aefa2c4/improve
+**URL**: https://run.gptengineer.app/projects/7e865fa4-e34d-4f69-b3b7-43243fc5a2b2/improve
 
 ## How can I edit this code?
 
@@ -12,7 +12,7 @@ There are several ways of editing your application.
 
 **Use GPT Engineer**
 
-Simply visit the GPT Engineer project at [GPT Engineer](https://gptengineer.app/projects/f50ee67b-9bf8-463b-91ba-1cf36aefa2c4/improve) and start prompting.
+Simply visit the GPT Engineer project at [GPT Engineer](https://gptengineer.app/projects/7e865fa4-e34d-4f69-b3b7-43243fc5a2b2/improve) and start prompting.
 
 Changes made via gptengineer.app will be committed automatically to this repo.
 
@@ -25,8 +25,8 @@ The only requirement is having Node.js & npm installed - [install with nvm](http
 Follow these steps:
 
 ```sh
-git clone https://github.com/GPT-Engineer-App/chatwhirl.git
-cd chatwhirl
+git clone https://github.com/GPT-Engineer-App/chatgenuity.git
+cd chatgenuity
 npm i
 
 # This will run a dev server with auto reloading and an instant preview.
@@ -60,7 +60,7 @@ This project is built with .
 
 All GPT Engineer projects can be deployed directly via the GPT Engineer app.
 
-Simply visit your project at [GPT Engineer](https://gptengineer.app/projects/f50ee67b-9bf8-463b-91ba-1cf36aefa2c4/improve) and click on Share -> Publish.
+Simply visit your project at [GPT Engineer](https://gptengineer.app/projects/7e865fa4-e34d-4f69-b3b7-43243fc5a2b2/improve) and click on Share -> Publish.
 
 ## I want to use a custom domain - is that possible?
 
