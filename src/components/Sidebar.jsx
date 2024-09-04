@@ -40,7 +40,7 @@ const Sidebar = ({ chats, currentChatId, setCurrentChatId, addNewChat, editingCh
                 <Input
                   value={editedTitle}
                   onChange={(e) => setEditedTitle(e.target.value)}
-                  className="mr-2"
+                  className="mr-2 focus:ring-0 focus:border-transparent"
                   autoFocus
                   onKeyDown={(e) => {
                     if (e.key === 'Enter') {
@@ -61,13 +61,13 @@ const Sidebar = ({ chats, currentChatId, setCurrentChatId, addNewChat, editingCh
               <>
                 <Button
                   variant={chat.id === currentChatId ? 'secondary' : 'ghost'}
-                  className={`flex-grow justify-start ${chat.id === currentChatId ? 'bg-gray-200 dark:bg-gray-700' : ''}`}
+                  className={`flex-grow justify-start ${chat.id === currentChatId ? 'bg-accent' : ''} truncate`}
                   onClick={() => {
                     setCurrentChatId(chat.id);
                     setIsMobileMenuOpen(false);
                   }}
                 >
-                  {chat.title}
+                  <span className="truncate">{chat.title}</span>
                 </Button>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
