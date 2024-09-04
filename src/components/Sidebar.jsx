@@ -61,13 +61,13 @@ const Sidebar = ({ chats, currentChatId, setCurrentChatId, addNewChat, editingCh
               <>
                 <Button
                   variant={chat.id === currentChatId ? 'secondary' : 'ghost'}
-                  className={`flex-grow justify-start ${chat.id === currentChatId ? 'bg-gray-200 dark:bg-gray-700' : ''} truncate`}
+                  className={`flex-grow justify-start ${chat.id === currentChatId ? 'bg-accent' : ''}`}
                   onClick={() => {
                     setCurrentChatId(chat.id);
                     setIsMobileMenuOpen(false);
                   }}
                 >
-                  <span className="truncate">{chat.title}</span>
+                  {chat.title}
                 </Button>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
@@ -97,12 +97,10 @@ const Sidebar = ({ chats, currentChatId, setCurrentChatId, addNewChat, editingCh
 
   return (
     <>
-      {/* Desktop Sidebar */}
       <aside className="hidden md:flex w-64 bg-secondary p-4 flex-col">
         <ChatList />
       </aside>
 
-      {/* Mobile Menu Button */}
       <div className="md:hidden">
         <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
           <SheetTrigger asChild>
