@@ -34,9 +34,9 @@ const Sidebar = ({ chats, currentChatId, setCurrentChatId, addNewChat, editingCh
       </Button>
       <div className="flex-1 overflow-y-auto">
         {chats.map((chat) => (
-          <div key={chat.id} className="flex items-center mb-2">
+          <div key={chat.id} className="grid grid-cols-[1fr,auto] items-center mb-2 gap-1">
             {editingChatId === chat.id ? (
-              <div className="flex items-center w-full">
+              <div className="col-span-2 flex items-center w-full">
                 <Input
                   value={editedTitle}
                   onChange={(e) => setEditedTitle(e.target.value)}
@@ -61,7 +61,7 @@ const Sidebar = ({ chats, currentChatId, setCurrentChatId, addNewChat, editingCh
               <>
                 <Button
                   variant={chat.id === currentChatId ? 'secondary' : 'ghost'}
-                  className={`flex-grow justify-start ${chat.id === currentChatId ? 'bg-gray-200 dark:bg-gray-700' : ''} truncate`}
+                  className={`justify-start h-9 px-2 ${chat.id === currentChatId ? 'bg-gray-200 dark:bg-gray-700' : ''}`}
                   onClick={() => {
                     setCurrentChatId(chat.id);
                     setIsMobileMenuOpen(false);
@@ -71,7 +71,7 @@ const Sidebar = ({ chats, currentChatId, setCurrentChatId, addNewChat, editingCh
                 </Button>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="icon">
+                    <Button variant="ghost" size="icon" className="h-9 w-9">
                       <MoreVertical className="h-4 w-4" />
                     </Button>
                   </DropdownMenuTrigger>
