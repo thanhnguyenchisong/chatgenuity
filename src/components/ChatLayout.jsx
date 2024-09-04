@@ -57,8 +57,7 @@ const ChatLayout = ({ username, onLogout }) => {
         removeChat={removeChat}
       />
       <main className="flex-1 flex flex-col">
-        <div className="p-4 flex justify-between items-center bg-secondary">
-          <span className="font-bold text-xl">Chat Bot</span>
+        <div className="p-4 flex justify-between items-center">
           <Select value={selectedModel} onValueChange={setSelectedModel}>
             <SelectTrigger className="w-[180px]">
               <SelectValue placeholder="Select model" />
@@ -68,6 +67,7 @@ const ChatLayout = ({ username, onLogout }) => {
               <SelectItem value="gemini-1.5">Gemini 1.5</SelectItem>
             </SelectContent>
           </Select>
+          <span className="font-bold text-center flex-grow">Welcome, {username}!</span>
           <div>
             <Button variant="ghost" size="icon" onClick={toggleTheme} className="mr-2">
               {theme === 'dark' ? <Sun className="h-[1.2rem] w-[1.2rem]" /> : <Moon className="h-[1.2rem] w-[1.2rem]" />}
