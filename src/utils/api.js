@@ -1,22 +1,73 @@
-import { useState, useEffect } from 'react';
+import { toast } from 'sonner';
 
 const API_BASE_URL = 'http://localhost:8080';
 
-export const sendMessage = async (message, selectedModel) => {
-  const response = await fetch(`${API_BASE_URL}/chat`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ message, model: selectedModel }),
-  });
+let authToken = null;
 
+const handleResponse = async (response) => {
   if (!response.ok) {
-    throw new Error('Failed to send message');
+    const errorData = await response.json();
+    throw new Error(errorData.message || 'An error occurred');
   }
+  return response.json();
+};
 
-  const reader = response.body.getReader();
-  return reader;
+export const login = async (username, password) => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/login`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ username, password }),
+    });
+    const data = await handleResponse(response);
+    authToken = data.token;
+    return data.user;
+  } catch (error) {
+    toast.error(error.message);
+    throw error;
+  }
+};
+
+export const createChat = async (title) => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/chats`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${authToken}`,
+      },
+      body: JSON.stringify({ title }),
+    });
+    return await handleResponse(response);
+  } catch (error) {
+    toast.error(error.message);
+    throw error;
+  }
+};
+
+export const sendMessage = async (chatId, message, selectedModel) => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/chats/${chatId}/messages`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${authToken}`,
+      },
+      body: JSON.stringify({ message, model: selectedModel }),
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to send message');
+    }
+
+    const reader = response.body.getReader();
+    return reader;
+  } catch (error) {
+    toast.error(error.message);
+    throw error;
+  }
 };
 
 export const useStreamResponse = (reader) => {
@@ -39,6 +90,7 @@ export const useStreamResponse = (reader) => {
         }
       } catch (error) {
         console.error('Error reading stream:', error);
+        toast.error('Error reading response stream');
       }
     };
 

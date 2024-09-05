@@ -5,18 +5,23 @@ import { Button } from './ui/button';
 import { Moon, Sun, LogOut } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
+import { createChat } from '../utils/api';
 
 const ChatLayout = ({ username, onLogout }) => {
-  const [chats, setChats] = useState([{ id: 1, title: 'New chat', messages: [] }]);
-  const [currentChatId, setCurrentChatId] = useState(1);
+  const [chats, setChats] = useState([]);
+  const [currentChatId, setCurrentChatId] = useState(null);
   const { theme, setTheme } = useTheme();
   const [editingChatId, setEditingChatId] = useState(null);
   const [selectedModel, setSelectedModel] = useState('gpt-4');
 
-  const addNewChat = () => {
-    const newChat = { id: Date.now(), title: 'New chat', messages: [] };
-    setChats([...chats, newChat]);
-    setCurrentChatId(newChat.id);
+  const addNewChat = async () => {
+    try {
+      const newChat = await createChat('New chat');
+      setChats([...chats, newChat]);
+      setCurrentChatId(newChat.id);
+    } catch (error) {
+      console.error('Failed to create new chat:', error);
+    }
   };
 
   const updateChat = (chatId, newMessages) => {

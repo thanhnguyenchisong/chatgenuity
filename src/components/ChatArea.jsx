@@ -37,7 +37,7 @@ const ChatArea = ({ chat, updateChat, selectedModel }) => {
     setIsTyping(true);
 
     try {
-      const reader = await sendMessage(content, selectedModel);
+      const reader = await sendMessage(chat.id, content, selectedModel);
       setCurrentReader(reader);
     } catch (error) {
       console.error('Error sending message:', error);

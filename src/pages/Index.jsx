@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import ChatLayout from '../components/ChatLayout';
 import LoginForm from '../components/LoginForm';
 import { ThemeProvider } from 'next-themes';
+import { login } from '../utils/api';
 
 const Index = () => {
   const [user, setUser] = useState(null);
@@ -13,11 +14,14 @@ const Index = () => {
     }
   }, []);
 
-  const handleLogin = (username, password) => {
-    // In a real application, you would validate the password here
-    const newUser = { username };
-    setUser(newUser);
-    localStorage.setItem('chatwhirl_user', JSON.stringify(newUser));
+  const handleLogin = async (username, password) => {
+    try {
+      const loggedInUser = await login(username, password);
+      setUser(loggedInUser);
+      localStorage.setItem('chatwhirl_user', JSON.stringify(loggedInUser));
+    } catch (error) {
+      console.error('Login failed:', error);
+    }
   };
 
   const handleLogout = () => {
