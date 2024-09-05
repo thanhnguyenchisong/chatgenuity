@@ -3,12 +3,12 @@ import { Textarea } from './ui/textarea';
 import { Button } from './ui/button';
 import { Send } from 'lucide-react';
 
-const ChatInput = ({ onSendMessage }) => {
+const ChatInput = ({ onSendMessage, isTyping }) => {
   const [message, setMessage] = useState('');
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (message.trim()) {
+    if (message.trim() && !isTyping) {
       onSendMessage(message);
       setMessage('');
     }
@@ -30,8 +30,9 @@ const ChatInput = ({ onSendMessage }) => {
         placeholder="Type your message here... (Press Enter to send, Shift+Enter for new line)"
         className="flex-1 mr-2"
         rows={3}
+        disabled={isTyping}
       />
-      <Button type="submit" size="icon">
+      <Button type="submit" size="icon" disabled={isTyping}>
         <Send className="h-4 w-4" />
       </Button>
     </form>
