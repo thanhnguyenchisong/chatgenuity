@@ -1,4 +1,3 @@
-import { useState, useEffect } from 'react';
 import { toast } from 'sonner';
 
 const API_BASE_URL = 'http://localhost:8080';
@@ -71,36 +70,19 @@ export const sendMessage = async (chatId, message, selectedModel) => {
   }
 };
 
-export const useStreamResponse = (reader) => {
-  const [streamedResponse, setStreamedResponse] = useState('');
-  const [isComplete, setIsComplete] = useState(false);
-
-  useEffect(() => {
-    if (!reader) return;
-
-    const readStream = async () => {
-      try {
-        while (true) {
-          const { done, value } = await reader.read();
-          if (done) {
-            setIsComplete(true);
-            break;
-          }
-          const chunk = new TextDecoder().decode(value);
-          setStreamedResponse((prev) => prev + chunk);
-        }
-      } catch (error) {
-        console.error('Error reading stream:', error);
-        toast.error('Error reading response stream');
+export const readStream = async (reader, onChunk, onComplete) => {
+  try {
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) {
+        onComplete();
+        break;
       }
-    };
-
-    readStream();
-
-    return () => {
-      reader.cancel();
-    };
-  }, [reader]);
-
-  return { streamedResponse, isComplete };
+      const chunk = new TextDecoder().decode(value);
+      onChunk(chunk);
+    }
+  } catch (error) {
+    console.error('Error reading stream:', error);
+    toast.error('Error reading response stream');
+  }
 };

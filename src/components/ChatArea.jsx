@@ -3,12 +3,11 @@ import { motion, AnimatePresence } from 'framer-motion';
 import ChatInput from './ChatInput';
 import { Bot, ThumbsUp, ThumbsDown } from 'lucide-react';
 import { Button } from './ui/button';
-import { sendMessage, useStreamResponse } from '../utils/api';
+import { sendMessage, readStream } from '../utils/api';
 
 const ChatArea = ({ chat, updateChat, selectedModel }) => {
   const [isTyping, setIsTyping] = useState(false);
-  const [currentReader, setCurrentReader] = useState(null);
-  const { streamedResponse, isComplete } = useStreamResponse(currentReader);
+  const [streamedResponse, setStreamedResponse] = useState('');
   const messagesEndRef = useRef(null);
 
   const scrollToBottom = () => {
@@ -19,17 +18,6 @@ const ChatArea = ({ chat, updateChat, selectedModel }) => {
     scrollToBottom();
   }, [chat?.messages, streamedResponse]);
 
-  useEffect(() => {
-    if (isComplete) {
-      setIsTyping(false);
-      updateChat([
-        ...(chat?.messages || []),
-        { id: Date.now(), content: streamedResponse, isUser: false, reaction: null },
-      ]);
-      setCurrentReader(null);
-    }
-  }, [isComplete, streamedResponse]);
-
   const addMessage = async (content) => {
     if (!chat) return;
     const newMessage = { id: Date.now(), content, isUser: true, reaction: null };
@@ -38,7 +26,20 @@ const ChatArea = ({ chat, updateChat, selectedModel }) => {
 
     try {
       const reader = await sendMessage(chat.id, content, selectedModel);
-      setCurrentReader(reader);
+      setStreamedResponse('');
+      await readStream(
+        reader,
+        (chunk) => setStreamedResponse((prev) => prev + chunk),
+        () => {
+          setIsTyping(false);
+          updateChat([
+            ...(chat.messages || []),
+            newMessage,
+            { id: Date.now(), content: streamedResponse, isUser: false, reaction: null },
+          ]);
+          setStreamedResponse('');
+        }
+      );
     } catch (error) {
       console.error('Error sending message:', error);
       setIsTyping(false);
