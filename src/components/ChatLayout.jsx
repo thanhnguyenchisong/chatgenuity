@@ -2,12 +2,12 @@ import React, { useState } from 'react';
 import Sidebar from './Sidebar';
 import ChatArea from './ChatArea';
 import { Button } from './ui/button';
-import { Moon, Sun, LogOut } from 'lucide-react';
+import { Moon, Sun } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { createChat } from '../utils/api';
 
-const ChatLayout = ({ username, onLogout }) => {
+const ChatLayout = ({ username }) => {
   const [chats, setChats] = useState([]);
   const [currentChatId, setCurrentChatId] = useState(null);
   const { theme, setTheme } = useTheme();
@@ -76,9 +76,6 @@ const ChatLayout = ({ username, onLogout }) => {
           <div>
             <Button variant="ghost" size="icon" onClick={toggleTheme} className="mr-2">
               {theme === 'dark' ? <Sun className="h-[1.2rem] w-[1.2rem]" /> : <Moon className="h-[1.2rem] w-[1.2rem]" />}
-            </Button>
-            <Button variant="ghost" size="icon" onClick={onLogout}>
-              <LogOut className="h-[1.2rem] w-[1.2rem]" />
             </Button>
           </div>
         </div>
