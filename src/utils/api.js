@@ -30,6 +30,7 @@ export const login = async (username, password) => {
   }
 };
 
+
 export const createChat = async (title) => {
   try {
     const response = await fetch(`${API_BASE_URL}/chats`, {
