@@ -2,26 +2,21 @@ import React, { useState } from 'react';
 import Sidebar from './Sidebar';
 import ChatArea from './ChatArea';
 import { Button } from './ui/button';
-import { Moon, Sun } from 'lucide-react';
+import { Moon, Sun, LogOut } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
-import { createChat } from '../utils/api';
 
-const ChatLayout = ({ username }) => {
-  const [chats, setChats] = useState([]);
-  const [currentChatId, setCurrentChatId] = useState(null);
+const ChatLayout = ({ username, onLogout }) => {
+  const [chats, setChats] = useState([{ id: 1, title: 'New chat', messages: [] }]);
+  const [currentChatId, setCurrentChatId] = useState(1);
   const { theme, setTheme } = useTheme();
   const [editingChatId, setEditingChatId] = useState(null);
   const [selectedModel, setSelectedModel] = useState('gpt-4');
 
-  const addNewChat = async () => {
-    try {
-      const newChat = await createChat('New chat');
-      setChats([...chats, newChat]);
-      setCurrentChatId(newChat.id);
-    } catch (error) {
-      console.error('Failed to create new chat:', error);
-    }
+  const addNewChat = () => {
+    const newChat = { id: Date.now(), title: 'New chat', messages: [] };
+    setChats([...chats, newChat]);
+    setCurrentChatId(newChat.id);
   };
 
   const updateChat = (chatId, newMessages) => {
@@ -76,6 +71,9 @@ const ChatLayout = ({ username }) => {
           <div>
             <Button variant="ghost" size="icon" onClick={toggleTheme} className="mr-2">
               {theme === 'dark' ? <Sun className="h-[1.2rem] w-[1.2rem]" /> : <Moon className="h-[1.2rem] w-[1.2rem]" />}
+            </Button>
+            <Button variant="ghost" size="icon" onClick={onLogout}>
+              <LogOut className="h-[1.2rem] w-[1.2rem]" />
             </Button>
           </div>
         </div>
