@@ -3,27 +3,15 @@ import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { PlusCircle, Menu, MoreVertical, Check, X } from 'lucide-react';
 import { Sheet, SheetContent, SheetTrigger } from './ui/sheet';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "./ui/dropdown-menu";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "./ui/dropdown-menu";
 
-const Sidebar = ({ chats, currentChatId, setCurrentChatId, addNewChat, editingChatId, setEditingChatId, handleChatNameEdit, removeChat }) => {
+const Sidebar = ({ chats, currentChatId, setCurrentChatId, addNewChat, handleChatNameEdit, removeChat }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [editingChatId, setEditingChatId] = useState(null);
   const [editedTitle, setEditedTitle] = useState('');
-
-  const handleNewChat = () => {
-    addNewChat();
-  };
 
   const handleRenameSubmit = (chatId) => {
     handleChatNameEdit(chatId, editedTitle);
-    setEditingChatId(null);
-  };
-
-  const handleRenameCancel = () => {
     setEditingChatId(null);
   };
 
@@ -34,7 +22,7 @@ const Sidebar = ({ chats, currentChatId, setCurrentChatId, addNewChat, editingCh
 
   const ChatList = () => (
     <>
-      <Button onClick={handleNewChat} className="mb-4 w-full">
+      <Button onClick={addNewChat} className="mb-4 w-full">
         <PlusCircle className="mr-2 h-4 w-4" /> New Chat
       </Button>
       <div className="flex-1 overflow-y-auto">
@@ -48,17 +36,14 @@ const Sidebar = ({ chats, currentChatId, setCurrentChatId, addNewChat, editingCh
                   className="mr-2"
                   autoFocus
                   onKeyDown={(e) => {
-                    if (e.key === 'Enter') {
-                      handleRenameSubmit(chat.id);
-                    } else if (e.key === 'Escape') {
-                      handleRenameCancel();
-                    }
+                    if (e.key === 'Enter') handleRenameSubmit(chat.id);
+                    else if (e.key === 'Escape') setEditingChatId(null);
                   }}
                 />
                 <Button size="icon" onClick={() => handleRenameSubmit(chat.id)}>
                   <Check className="h-4 w-4" />
                 </Button>
-                <Button size="icon" variant="ghost" onClick={handleRenameCancel}>
+                <Button size="icon" variant="ghost" onClick={() => setEditingChatId(null)}>
                   <X className="h-4 w-4" />
                 </Button>
               </div>
@@ -102,7 +87,6 @@ const Sidebar = ({ chats, currentChatId, setCurrentChatId, addNewChat, editingCh
       <aside className="hidden md:flex w-64 bg-secondary p-4 flex-col">
         <ChatList />
       </aside>
-
       <div className="md:hidden">
         <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
           <SheetTrigger asChild>

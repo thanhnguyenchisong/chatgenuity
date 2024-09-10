@@ -63,32 +63,16 @@ const ChatArea = ({ chat, updateChat, makeAuthenticatedRequest }) => {
               exit={{ opacity: 0, y: -20 }}
               className={`mb-4 ${message.isUser ? 'text-right' : 'text-left'}`}
             >
-              <div
-                className={`inline-block p-3 rounded-lg ${
-                  message.isUser ? 'bg-primary text-primary-foreground' : 'bg-secondary'
-                }`}
-              >
-                {!message.isUser && (
-                  <Bot className="inline-block mr-2 h-4 w-4" />
-                )}
+              <div className={`inline-block p-3 rounded-lg ${message.isUser ? 'bg-primary text-primary-foreground' : 'bg-secondary'}`}>
+                {!message.isUser && <Bot className="inline-block mr-2 h-4 w-4" />}
                 {message.content}
               </div>
               {!message.isUser && (
                 <div className="mt-2">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => handleReaction(message.id, 'like')}
-                    className={message.reaction === 'like' ? 'text-green-500' : ''}
-                  >
+                  <Button variant="ghost" size="sm" onClick={() => handleReaction(message.id, 'like')} className={message.reaction === 'like' ? 'text-green-500' : ''}>
                     <ThumbsUp className="h-4 w-4" />
                   </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => handleReaction(message.id, 'dislike')}
-                    className={message.reaction === 'dislike' ? 'text-red-500' : ''}
-                  >
+                  <Button variant="ghost" size="sm" onClick={() => handleReaction(message.id, 'dislike')} className={message.reaction === 'dislike' ? 'text-red-500' : ''}>
                     <ThumbsDown className="h-4 w-4" />
                   </Button>
                 </div>
@@ -97,12 +81,7 @@ const ChatArea = ({ chat, updateChat, makeAuthenticatedRequest }) => {
           ))}
         </AnimatePresence>
         {isTyping && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="flex items-center text-muted-foreground"
-          >
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex items-center text-muted-foreground">
             <Bot className="mr-2 h-4 w-4" />
             <span className="typing-animation">
               <span>.</span><span>.</span><span>.</span>
