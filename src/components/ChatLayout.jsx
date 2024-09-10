@@ -23,6 +23,7 @@ const ChatLayout = ({ username, onLogout, keycloak }) => {
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
+      if('DELETE' === method) return;
       return await response.json();
     } catch (error) {
       console.error('Error making authenticated request:', error);
