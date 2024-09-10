@@ -13,7 +13,7 @@ const ChatArea = ({ chat, updateChat, makeAuthenticatedRequest }) => {
     if (chat && chat.id) {
       fetchMessages(chat.id);
     }
-  }, [chat]);
+  }, [chat?.id]);
 
   const fetchMessages = async (chatId) => {
     try {
