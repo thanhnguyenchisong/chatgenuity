@@ -8,17 +8,20 @@ const API_BASE_URL = 'http://localhost:8080';
 
 const ChatArea = ({ chat, updateChat, makeAuthenticatedRequest }) => {
   const [isTyping, setIsTyping] = useState(false);
+  const [messages, setMessages] = useState([]);
 
   useEffect(() => {
     if (chat && chat.id) {
+      setMessages([]); // Clear old messages
       fetchMessages(chat.id);
     }
   }, [chat?.id]);
 
   const fetchMessages = async (chatId) => {
     try {
-      const messages = await makeAuthenticatedRequest(`${API_BASE_URL}/chat/messages?chatID=${chatId}`, 'GET');
-      updateChat(messages);
+      const fetchedMessages = await makeAuthenticatedRequest(`${API_BASE_URL}/chat/messages?chatID=${chatId}`, 'GET');
+      setMessages(fetchedMessages);
+      updateChat(fetchedMessages);
     } catch (error) {
       console.error('Error fetching messages:', error);
     }
@@ -28,7 +31,9 @@ const ChatArea = ({ chat, updateChat, makeAuthenticatedRequest }) => {
     if (!chat) return;
     
     const newMessage = { id: Date.now(), content, isUser: true, reaction: null };
-    updateChat([...(chat.messages || []), newMessage]);
+    const updatedMessages = [...messages, newMessage];
+    setMessages(updatedMessages);
+    updateChat(updatedMessages);
     
     setIsTyping(true);
     
@@ -39,22 +44,24 @@ const ChatArea = ({ chat, updateChat, makeAuthenticatedRequest }) => {
       });
       
       const botResponse = { id: Date.now() + 1, content: response.message, isUser: false, reaction: null };
-      updateChat([...(chat.messages || []), newMessage, botResponse]);
+      const finalMessages = [...updatedMessages, botResponse];
+      setMessages(finalMessages);
+      updateChat(finalMessages);
     } catch (error) {
       console.error('Error sending message:', error);
-      // Optionally, add an error message to the chat
     } finally {
       setIsTyping(false);
     }
   };
 
   const handleReaction = (messageId, reaction) => {
-    if (!chat) return;
-    updateChat(chat.messages.map(message => 
+    const updatedMessages = messages.map(message => 
       message.id === messageId 
         ? { ...message, reaction: message.reaction === reaction ? null : reaction }
         : message
-    ));
+    );
+    setMessages(updatedMessages);
+    updateChat(updatedMessages);
   };
 
   if (!chat) {
@@ -65,7 +72,7 @@ const ChatArea = ({ chat, updateChat, makeAuthenticatedRequest }) => {
     <div className="flex-1 flex flex-col p-4 overflow-hidden">
       <div className="flex-1 overflow-y-auto mb-4">
         <AnimatePresence>
-          {chat.messages && chat.messages.map((message) => (
+          {messages.map((message) => (
             <motion.div
               key={message.id}
               initial={{ opacity: 0, y: 20 }}
