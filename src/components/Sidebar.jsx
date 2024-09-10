@@ -27,6 +27,11 @@ const Sidebar = ({ chats, currentChatId, setCurrentChatId, addNewChat, editingCh
     setEditingChatId(null);
   };
 
+  const handleChatSelect = (chatId) => {
+    setCurrentChatId(chatId);
+    setIsMobileMenuOpen(false);
+  };
+
   const ChatList = () => (
     <>
       <Button onClick={handleNewChat} className="mb-4 w-full">
@@ -62,10 +67,7 @@ const Sidebar = ({ chats, currentChatId, setCurrentChatId, addNewChat, editingCh
                 <Button
                   variant={chat.id === currentChatId ? 'secondary' : 'ghost'}
                   className={`flex-grow justify-start ${chat.id === currentChatId ? 'bg-gray-200 dark:bg-gray-700' : ''}`}
-                  onClick={() => {
-                    setCurrentChatId(chat.id);
-                    setIsMobileMenuOpen(false);
-                  }}
+                  onClick={() => handleChatSelect(chat.id)}
                 >
                   {chat.name}
                 </Button>

@@ -4,11 +4,28 @@ import ChatInput from './ChatInput';
 import { Bot, ThumbsUp, ThumbsDown } from 'lucide-react';
 import { Button } from './ui/button';
 
-const ChatArea = ({ chat, updateChat }) => {
+const API_BASE_URL = 'http://localhost:8080';
+
+const ChatArea = ({ chat, updateChat, makeAuthenticatedRequest }) => {
   const [isTyping, setIsTyping] = useState(false);
 
+  useEffect(() => {
+    if (chat && chat.id) {
+      fetchMessages(chat.id);
+    }
+  }, [chat]);
+
+  const fetchMessages = async (chatId) => {
+    try {
+      const messages = await makeAuthenticatedRequest(`${API_BASE_URL}/chat/${chatId}/messages`, 'GET');
+      updateChat(messages);
+    } catch (error) {
+      console.error('Error fetching messages:', error);
+    }
+  };
+
   const addMessage = (content, isUser = true) => {
-    if (!chat) return; // Add this check
+    if (!chat) return;
     const newMessage = { id: Date.now(), content, isUser, reaction: null };
     updateChat([...(chat.messages || []), newMessage]);
     if (isUser) {
@@ -22,7 +39,7 @@ const ChatArea = ({ chat, updateChat }) => {
   };
 
   const handleReaction = (messageId, reaction) => {
-    if (!chat) return; // Add this check
+    if (!chat) return;
     updateChat(chat.messages.map(message => 
       message.id === messageId 
         ? { ...message, reaction: message.reaction === reaction ? null : reaction }

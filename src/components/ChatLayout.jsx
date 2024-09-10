@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Sidebar from './Sidebar';
 import ChatArea from './ChatArea';
 import { Button } from './ui/button';
@@ -38,6 +38,19 @@ const ChatLayout = ({ username, onLogout, keycloak }) => {
       throw error;
     }
   };
+
+  useEffect(() => {
+    const fetchChats = async () => {
+      try {
+        const fetchedChats = await makeAuthenticatedRequest(`${API_BASE_URL}/chat/getChats`, 'GET');
+        setChats(fetchedChats);
+      } catch (error) {
+        console.error('Error fetching chats:', error);
+      }
+    };
+
+    fetchChats();
+  }, []);
 
   const addNewChat = async () => {
     try {
