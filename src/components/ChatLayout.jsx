@@ -5,16 +5,36 @@ import { Button } from './ui/button';
 import { Moon, Sun, LogOut } from 'lucide-react';
 import { useTheme } from 'next-themes';
 
+const API_BASE_URL = 'http://localhost:8080';
+
 const ChatLayout = ({ username, onLogout }) => {
-  const [chats, setChats] = useState([{ id: 1, title: 'New chat', messages: [] }]);
-  const [currentChatId, setCurrentChatId] = useState(1);
+  const [chats, setChats] = useState([]);
+  const [currentChatId, setCurrentChatId] = useState(null);
   const { theme, setTheme } = useTheme();
   const [editingChatId, setEditingChatId] = useState(null);
 
-  const addNewChat = () => {
-    const newChat = { id: Date.now(), title: 'New chat', messages: [] };
-    setChats([...chats, newChat]);
-    setCurrentChatId(newChat.id);
+  const addNewChat = async () => {
+    const newChatName = `New chat ${chats.length + 1}`;
+    try {
+      const response = await fetch(`${API_BASE_URL}/chat/create`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ title: newChatName }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to create new chat');
+      }
+
+      const newChat = await response.json();
+      setChats([...chats, newChat]);
+      setCurrentChatId(newChat.id);
+    } catch (error) {
+      console.error('Error creating new chat:', error);
+      // Optionally, you can show an error message to the user here
+    }
   };
 
   const updateChat = (chatId, newMessages) => {
