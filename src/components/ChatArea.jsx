@@ -1,14 +1,17 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import ChatInput from './ChatInput';
+import FormattedMessage from './FormattedMessage';
 import { Bot, ThumbsUp, ThumbsDown } from 'lucide-react';
 import { Button } from './ui/button';
 
-const API_BASE_URL = 'http://localhost:8080';
+const API_BASE_URL = 'http://localhost:2024';
 
 const ChatArea = ({ chat, updateChat, makeAuthenticatedRequest }) => {
   const [isTyping, setIsTyping] = useState(false);
   const [messages, setMessages] = useState([]);
+  const [pendingResponses, setPendingResponses] = useState({});
+  const messagesEndRef = useRef(null);
 
   useEffect(() => {
     if (chat && chat.id) {
@@ -16,6 +19,22 @@ const ChatArea = ({ chat, updateChat, makeAuthenticatedRequest }) => {
       fetchMessages(chat.id);
     }
   }, [chat?.id]);
+
+  useEffect(() => {
+    if (pendingResponses[chat?.id]) {
+      setIsTyping(true);
+    } else {
+      setIsTyping(false);
+    }
+  }, [pendingResponses, chat?.id]);
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages, isTyping]);
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
 
   const fetchMessages = async (chatId) => {
     try {
@@ -35,7 +54,7 @@ const ChatArea = ({ chat, updateChat, makeAuthenticatedRequest }) => {
     setMessages(updatedMessages);
     updateChat(updatedMessages);
     
-    setIsTyping(true);
+    setPendingResponses(prev => ({ ...prev, [chat.id]: true }));
     
     try {
       const response = await makeAuthenticatedRequest(`${API_BASE_URL}/chat/send`, 'POST', {
@@ -43,14 +62,15 @@ const ChatArea = ({ chat, updateChat, makeAuthenticatedRequest }) => {
         content: content
       });
       
+      setPendingResponses(prev => ({ ...prev, [chat.id]: false }));
+      
       const botResponse = { id: Date.now() + 1, content: response.content, isUser: false, reaction: null };
       const finalMessages = [...updatedMessages, botResponse];
       setMessages(finalMessages);
       updateChat(finalMessages);
     } catch (error) {
       console.error('Error sending message:', error);
-    } finally {
-      setIsTyping(false);
+      setPendingResponses(prev => ({ ...prev, [chat.id]: false }));
     }
   };
 
@@ -82,7 +102,7 @@ const ChatArea = ({ chat, updateChat, makeAuthenticatedRequest }) => {
             >
               <div className={`inline-block p-3 rounded-lg ${message.isUser ? 'bg-primary text-primary-foreground' : 'bg-secondary'}`}>
                 {!message.isUser && <Bot className="inline-block mr-2 h-4 w-4" />}
-                {message.content}
+                <FormattedMessage content={message.content} />
               </div>
               {!message.isUser && (
                 <div className="mt-2">
@@ -105,6 +125,7 @@ const ChatArea = ({ chat, updateChat, makeAuthenticatedRequest }) => {
             </span>
           </motion.div>
         )}
+        <div ref={messagesEndRef} />
       </div>
       <ChatInput onSendMessage={sendMessage} />
     </div>

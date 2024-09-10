@@ -8,8 +8,15 @@ import useChatManagement from '../hooks/useChatManagement';
 
 const ChatLayout = ({ username, onLogout, keycloak }) => {
   const { theme, setTheme } = useTheme();
+
   const makeAuthenticatedRequest = async (url, method, body = null) => {
     try {
+      // Refresh token if it's close to expiration (e.g., less than 30 seconds left)
+      const tokenExpiresIn = keycloak.tokenParsed.exp - Math.floor(Date.now() / 1000);
+      if (tokenExpiresIn < 30) {
+        await keycloak.updateToken(30);
+      }
+
       const headers = {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${keycloak.token}`,
@@ -23,10 +30,14 @@ const ChatLayout = ({ username, onLogout, keycloak }) => {
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-      if('DELETE' === method) return;
+      if ('DELETE' === method) return;
       return await response.json();
     } catch (error) {
       console.error('Error making authenticated request:', error);
+      if (error.message.includes('Token refresh failed')) {
+        // If token refresh fails, redirect to login
+        keycloak.login();
+      }
       throw error;
     }
   };
