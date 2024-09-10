@@ -47,7 +47,11 @@ const Index = () => {
             <LoginForm onLogin={handleLogin} />
           </div>
         ) : (
-          <ChatLayout username={keycloak.tokenParsed.preferred_username} onLogout={handleLogout} />
+          <ChatLayout 
+            username={keycloak.tokenParsed.preferred_username} 
+            onLogout={handleLogout} 
+            keycloak={keycloak}
+          />
         )}
       </div>
     </ThemeProvider>

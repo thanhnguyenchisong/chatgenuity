@@ -7,28 +7,42 @@ import { useTheme } from 'next-themes';
 
 const API_BASE_URL = 'http://localhost:8080';
 
-const ChatLayout = ({ username, onLogout }) => {
+const ChatLayout = ({ username, onLogout, keycloak }) => {
   const [chats, setChats] = useState([]);
   const [currentChatId, setCurrentChatId] = useState(null);
   const { theme, setTheme } = useTheme();
   const [editingChatId, setEditingChatId] = useState(null);
 
+  const makeAuthenticatedRequest = async (url, method, body = null) => {
+    try {
+      const headers = {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${keycloak.token}`,
+      };
+
+      const options = {
+        method,
+        headers,
+        body: body ? JSON.stringify(body) : null,
+      };
+
+      const response = await fetch(url, options);
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error('Error making authenticated request:', error);
+      throw error;
+    }
+  };
+
   const addNewChat = async () => {
     const newChatName = `New chat ${chats.length + 1}`;
     try {
-      const response = await fetch(`${API_BASE_URL}/chat/create`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ title: newChatName }),
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to create new chat');
-      }
-
-      const newChat = await response.json();
+      const newChat = await makeAuthenticatedRequest(`${API_BASE_URL}/chat/create`, 'POST', { title: newChatName });
       setChats([...chats, newChat]);
       setCurrentChatId(newChat.id);
     } catch (error) {
@@ -89,6 +103,7 @@ const ChatLayout = ({ username, onLogout }) => {
         <ChatArea 
           chat={chats.find(chat => chat.id === currentChatId)} 
           updateChat={(newMessages) => updateChat(currentChatId, newMessages)} 
+          makeAuthenticatedRequest={makeAuthenticatedRequest}
         />
       </main>
     </div>
