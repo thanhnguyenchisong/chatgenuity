@@ -67,7 +67,7 @@ const Sidebar = ({ chats, currentChatId, setCurrentChatId, addNewChat, editingCh
                     setIsMobileMenuOpen(false);
                   }}
                 >
-                  {chat.title}
+                  {chat.name}
                 </Button>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
@@ -78,7 +78,7 @@ const Sidebar = ({ chats, currentChatId, setCurrentChatId, addNewChat, editingCh
                   <DropdownMenuContent>
                     <DropdownMenuItem onSelect={() => {
                       setEditingChatId(chat.id);
-                      setEditedTitle(chat.title);
+                      setEditedTitle(chat.name);
                     }}>
                       Rename
                     </DropdownMenuItem>
@@ -97,12 +97,10 @@ const Sidebar = ({ chats, currentChatId, setCurrentChatId, addNewChat, editingCh
 
   return (
     <>
-      {/* Desktop Sidebar */}
       <aside className="hidden md:flex w-64 bg-secondary p-4 flex-col">
         <ChatList />
       </aside>
 
-      {/* Mobile Menu Button */}
       <div className="md:hidden">
         <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
           <SheetTrigger asChild>

@@ -40,14 +40,12 @@ const ChatLayout = ({ username, onLogout, keycloak }) => {
   };
 
   const addNewChat = async () => {
-    const newChatName = `New chat ${chats.length + 1}`;
     try {
-      const newChat = await makeAuthenticatedRequest(`${API_BASE_URL}/chat/create`, 'POST', { name: newChatName });
+      const newChat = await makeAuthenticatedRequest(`${API_BASE_URL}/chat/create`, 'POST', { name: "New chat" });
       setChats([...chats, newChat]);
       setCurrentChatId(newChat.id);
     } catch (error) {
       console.error('Error creating new chat:', error);
-      // Optionally, you can show an error message to the user here
     }
   };
 
@@ -65,12 +63,11 @@ const ChatLayout = ({ username, onLogout, keycloak }) => {
     try {
       await makeAuthenticatedRequest(`${API_BASE_URL}/chat/update`, 'PUT', { name: newTitle });
       setChats(chats.map(chat =>
-        chat.id === chatId ? { ...chat, title: newTitle } : chat
+        chat.id === chatId ? { ...chat, name: newTitle } : chat
       ));
       setEditingChatId(null);
     } catch (error) {
       console.error('Error updating chat name:', error);
-      // Optionally, you can show an error message to the user here
     }
   };
 
@@ -84,7 +81,6 @@ const ChatLayout = ({ username, onLogout, keycloak }) => {
       }
     } catch (error) {
       console.error('Error deleting chat:', error);
-      // Optionally, you can show an error message to the user here
     }
   };
 
