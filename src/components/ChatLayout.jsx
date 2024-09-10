@@ -42,7 +42,7 @@ const ChatLayout = ({ username, onLogout, keycloak }) => {
   const addNewChat = async () => {
     const newChatName = `New chat ${chats.length + 1}`;
     try {
-      const newChat = await makeAuthenticatedRequest(`${API_BASE_URL}/chat/create`, 'POST', { title: newChatName });
+      const newChat = await makeAuthenticatedRequest(`${API_BASE_URL}/chat/create`, 'POST', { name: newChatName });
       setChats([...chats, newChat]);
       setCurrentChatId(newChat.id);
     } catch (error) {
@@ -61,18 +61,30 @@ const ChatLayout = ({ username, onLogout, keycloak }) => {
     setTheme(theme === 'dark' ? 'light' : 'dark');
   };
 
-  const handleChatNameEdit = (chatId, newTitle) => {
-    setChats(chats.map(chat =>
-      chat.id === chatId ? { ...chat, title: newTitle } : chat
-    ));
-    setEditingChatId(null);
+  const handleChatNameEdit = async (chatId, newTitle) => {
+    try {
+      await makeAuthenticatedRequest(`${API_BASE_URL}/chat/update`, 'PUT', { name: newTitle });
+      setChats(chats.map(chat =>
+        chat.id === chatId ? { ...chat, title: newTitle } : chat
+      ));
+      setEditingChatId(null);
+    } catch (error) {
+      console.error('Error updating chat name:', error);
+      // Optionally, you can show an error message to the user here
+    }
   };
 
-  const removeChat = (chatId) => {
-    const newChats = chats.filter(chat => chat.id !== chatId);
-    setChats(newChats);
-    if (currentChatId === chatId) {
-      setCurrentChatId(newChats[0]?.id || null);
+  const removeChat = async (chatId) => {
+    try {
+      await makeAuthenticatedRequest(`${API_BASE_URL}/chat/${chatId}`, 'DELETE');
+      const newChats = chats.filter(chat => chat.id !== chatId);
+      setChats(newChats);
+      if (currentChatId === chatId) {
+        setCurrentChatId(newChats[0]?.id || null);
+      }
+    } catch (error) {
+      console.error('Error deleting chat:', error);
+      // Optionally, you can show an error message to the user here
     }
   };
 
