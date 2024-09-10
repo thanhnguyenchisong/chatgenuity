@@ -4,14 +4,12 @@ import ChatArea from './ChatArea';
 import { Button } from './ui/button';
 import { Moon, Sun, LogOut } from 'lucide-react';
 import { useTheme } from 'next-themes';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 
 const ChatLayout = ({ username, onLogout }) => {
   const [chats, setChats] = useState([{ id: 1, title: 'New chat', messages: [] }]);
   const [currentChatId, setCurrentChatId] = useState(1);
   const { theme, setTheme } = useTheme();
   const [editingChatId, setEditingChatId] = useState(null);
-  const [selectedModel, setSelectedModel] = useState('gpt-4');
 
   const addNewChat = () => {
     const newChat = { id: Date.now(), title: 'New chat', messages: [] };
@@ -58,15 +56,6 @@ const ChatLayout = ({ username, onLogout }) => {
       />
       <main className="flex-1 flex flex-col">
         <div className="p-4 flex justify-between items-center">
-          <Select value={selectedModel} onValueChange={setSelectedModel}>
-            <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="Select model" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="gpt-4">Chat GPT 4.0</SelectItem>
-              <SelectItem value="gemini-1.5">Gemini 1.5</SelectItem>
-            </SelectContent>
-          </Select>
           <span className="font-bold text-center flex-grow">Welcome, {username}!</span>
           <div>
             <Button variant="ghost" size="icon" onClick={toggleTheme} className="mr-2">
@@ -80,7 +69,6 @@ const ChatLayout = ({ username, onLogout }) => {
         <ChatArea 
           chat={chats.find(chat => chat.id === currentChatId)} 
           updateChat={(newMessages) => updateChat(currentChatId, newMessages)} 
-          selectedModel={selectedModel}
         />
       </main>
     </div>
