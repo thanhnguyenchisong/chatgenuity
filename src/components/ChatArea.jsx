@@ -5,7 +5,7 @@ import FormattedMessage from './FormattedMessage';
 import { Bot, ThumbsUp, ThumbsDown } from 'lucide-react';
 import { Button } from './ui/button';
 
-const API_BASE_URL = 'http://localhost:2024';
+const API_BASE_URL = 'http://localhost:8080';
 
 const ChatArea = ({ chat, updateChat, makeAuthenticatedRequest }) => {
   const [isTyping, setIsTyping] = useState(false);
