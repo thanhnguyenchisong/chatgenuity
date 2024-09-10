@@ -24,17 +24,27 @@ const ChatArea = ({ chat, updateChat, makeAuthenticatedRequest }) => {
     }
   };
 
-  const addMessage = (content, isUser = true) => {
+  const sendMessage = async (content) => {
     if (!chat) return;
-    const newMessage = { id: Date.now(), content, isUser, reaction: null };
+    
+    const newMessage = { id: Date.now(), content, isUser: true, reaction: null };
     updateChat([...(chat.messages || []), newMessage]);
-    if (isUser) {
-      setIsTyping(true);
-      setTimeout(() => {
-        const botResponse = { id: Date.now() + 1, content: "This is a fake response from the AI.", isUser: false, reaction: null };
-        updateChat([...(chat.messages || []), newMessage, botResponse]);
-        setIsTyping(false);
-      }, 2000);
+    
+    setIsTyping(true);
+    
+    try {
+      const response = await makeAuthenticatedRequest(`${API_BASE_URL}/chat/send`, 'POST', {
+        chatID: chat.id,
+        message: content
+      });
+      
+      const botResponse = { id: Date.now() + 1, content: response.message, isUser: false, reaction: null };
+      updateChat([...(chat.messages || []), newMessage, botResponse]);
+    } catch (error) {
+      console.error('Error sending message:', error);
+      // Optionally, add an error message to the chat
+    } finally {
+      setIsTyping(false);
     }
   };
 
@@ -89,7 +99,7 @@ const ChatArea = ({ chat, updateChat, makeAuthenticatedRequest }) => {
           </motion.div>
         )}
       </div>
-      <ChatInput onSendMessage={addMessage} />
+      <ChatInput onSendMessage={sendMessage} />
     </div>
   );
 };
