@@ -40,10 +40,10 @@ const ChatArea = ({ chat, updateChat, makeAuthenticatedRequest }) => {
     try {
       const response = await makeAuthenticatedRequest(`${API_BASE_URL}/chat/send`, 'POST', {
         chatID: chat.id,
-        message: content
+        content: content
       });
       
-      const botResponse = { id: Date.now() + 1, content: response.message, isUser: false, reaction: null };
+      const botResponse = { id: Date.now() + 1, content: response.content, isUser: false, reaction: null };
       const finalMessages = [...updatedMessages, botResponse];
       setMessages(finalMessages);
       updateChat(finalMessages);
