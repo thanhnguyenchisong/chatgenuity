@@ -38,7 +38,7 @@ const ChatArea = ({ chat, updateChat, makeAuthenticatedRequest }) => {
 
   const fetchMessages = async (chatId) => {
     try {
-      const fetchedMessages = await makeAuthenticatedRequest(`${API_BASE_URL}/chat/messages?chatID=${chatId}`, 'GET');
+      const fetchedMessages = await makeAuthenticatedRequest(`${API_BASE_URL}/message/getMessages?chatID=${chatId}`, 'GET');
       setMessages(fetchedMessages);
       updateChat(fetchedMessages);
     } catch (error) {
