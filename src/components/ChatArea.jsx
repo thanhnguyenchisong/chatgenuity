@@ -94,7 +94,7 @@ const ChatArea = ({ chat, updateChat, makeAuthenticatedRequest }) => {
                 {!message.isUser && <Bot className="inline-block mr-2 h-4 w-4" />}
                 <FormattedMessage content={message.content} />
                 <span className="text-xs text-muted-foreground ml-2">
-                  {format(new Date(message.timestamp), 'HH:mm')}
+                  {format(new Date(message.timestamp), 'yyyy-MM-dd HH:mm:ss')}
                 </span>
               </div>
             </motion.div>
