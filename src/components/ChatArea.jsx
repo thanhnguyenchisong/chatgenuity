@@ -2,8 +2,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import ChatInput from './ChatInput';
 import FormattedMessage from './FormattedMessage';
-import { Bot, ThumbsUp, ThumbsDown } from 'lucide-react';
-import { Button } from './ui/button';
+import { Bot } from 'lucide-react';
+import { format } from 'date-fns';
 
 const API_BASE_URL = 'http://localhost:8080';
 
@@ -49,7 +49,7 @@ const ChatArea = ({ chat, updateChat, makeAuthenticatedRequest }) => {
   const sendMessage = async (content) => {
     if (!chat) return;
     
-    const newMessage = { id: Date.now(), content, isUser: true, reaction: null };
+    const newMessage = { id: Date.now(), content, isUser: true, timestamp: new Date() };
     const updatedMessages = [...messages, newMessage];
     setMessages(updatedMessages);
     updateChat(updatedMessages);
@@ -64,7 +64,7 @@ const ChatArea = ({ chat, updateChat, makeAuthenticatedRequest }) => {
       
       setPendingResponses(prev => ({ ...prev, [chat.id]: false }));
       
-      const botResponse = { id: Date.now() + 1, content: response.content, isUser: false, reaction: null };
+      const botResponse = { id: Date.now() + 1, content: response.content, isUser: false, timestamp: new Date() };
       const finalMessages = [...updatedMessages, botResponse];
       setMessages(finalMessages);
       updateChat(finalMessages);
@@ -72,16 +72,6 @@ const ChatArea = ({ chat, updateChat, makeAuthenticatedRequest }) => {
       console.error('Error sending message:', error);
       setPendingResponses(prev => ({ ...prev, [chat.id]: false }));
     }
-  };
-
-  const handleReaction = (messageId, reaction) => {
-    const updatedMessages = messages.map(message => 
-      message.id === messageId 
-        ? { ...message, reaction: message.reaction === reaction ? null : reaction }
-        : message
-    );
-    setMessages(updatedMessages);
-    updateChat(updatedMessages);
   };
 
   if (!chat) {
@@ -103,17 +93,10 @@ const ChatArea = ({ chat, updateChat, makeAuthenticatedRequest }) => {
               <div className={`inline-block p-3 rounded-lg ${message.isUser ? 'bg-primary text-primary-foreground' : 'bg-secondary'}`}>
                 {!message.isUser && <Bot className="inline-block mr-2 h-4 w-4" />}
                 <FormattedMessage content={message.content} />
+                <span className="text-xs text-muted-foreground ml-2">
+                  {format(new Date(message.timestamp), 'HH:mm')}
+                </span>
               </div>
-              {!message.isUser && (
-                <div className="mt-2">
-                  <Button variant="ghost" size="sm" onClick={() => handleReaction(message.id, 'like')} className={message.reaction === 'like' ? 'text-green-500' : ''}>
-                    <ThumbsUp className="h-4 w-4" />
-                  </Button>
-                  <Button variant="ghost" size="sm" onClick={() => handleReaction(message.id, 'dislike')} className={message.reaction === 'dislike' ? 'text-red-500' : ''}>
-                    <ThumbsDown className="h-4 w-4" />
-                  </Button>
-                </div>
-              )}
             </motion.div>
           ))}
         </AnimatePresence>
