@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
 import { Button } from './ui/button';
-import { Upload } from 'lucide-react';
-import { toast } from 'sonner';
+import { Upload, Loader2 } from 'lucide-react';
 import Modal from './Modal';
 
 const API_BASE_URL = 'http://localhost:8080';
 
-const DocumentUpload = ({ makeAuthenticatedRequest, isOpen, onClose }) => {
+const DocumentUpload = ({ makeAuthenticatedRequest, isOpen, onClose, onUploadSuccess, onUploadError }) => {
   const [file, setFile] = useState(null);
+  const [isUploading, setIsUploading] = useState(false);
 
   const handleFileChange = (e) => {
     setFile(e.target.files[0]);
@@ -16,21 +16,24 @@ const DocumentUpload = ({ makeAuthenticatedRequest, isOpen, onClose }) => {
   const handleUpload = async (e) => {
     e.preventDefault();
     if (!file) {
-      toast.error('Please select a file to upload');
+      onUploadError('Please select a file to upload');
       return;
     }
 
+    setIsUploading(true);
     const formData = new FormData();
     formData.append('file', file);
 
     try {
-      await makeAuthenticatedRequest(`${API_BASE_URL}/document/upload`, 'POST', formData, true);
-      toast.success('Document uploaded successfully');
+      await makeAuthenticatedRequest(`${API_BASE_URL}/policy/upload`, 'POST', formData, true);
       setFile(null);
+      setIsUploading(false);
       onClose();
+      onUploadSuccess();
     } catch (error) {
       console.error('Error uploading document:', error);
-      toast.error('Failed to upload document');
+      setIsUploading(false);
+      onUploadError('Failed to upload document');
     }
   };
 
@@ -50,7 +53,16 @@ const DocumentUpload = ({ makeAuthenticatedRequest, isOpen, onClose }) => {
         {file && <p className="text-sm text-gray-500">Selected file: {file.name}</p>}
         <div className="flex justify-end">
           <Button type="button" variant="outline" onClick={onClose} className="mr-2">Cancel</Button>
-          <Button type="submit">Upload Document</Button>
+          <Button type="submit" disabled={isUploading}>
+            {isUploading ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Uploading...
+              </>
+            ) : (
+              'Upload Document'
+            )}
+          </Button>
         </div>
       </form>
     </Modal>

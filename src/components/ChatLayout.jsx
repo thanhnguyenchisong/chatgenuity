@@ -7,6 +7,7 @@ import Documents from '../pages/Documents';
 import ChatArea from './ChatArea';
 import Sidebar from './Sidebar';
 import DocumentUpload from './DocumentUpload';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/dialog';
 
 const API_BASE_URL = 'http://localhost:8080';
 
@@ -14,7 +15,10 @@ const ChatLayout = ({ username, onLogout, keycloak }) => {
   const { theme, setTheme } = useTheme();
   const [currentView, setCurrentView] = useState('chat');
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
-  const [documents, setDocuments] = useState([]);
+  const [isSuccessDialogOpen, setIsSuccessDialogOpen] = useState(false);
+  const [isErrorDialogOpen, setIsErrorDialogOpen] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
+  const [refreshDocuments, setRefreshDocuments] = useState(false);
 
   const makeAuthenticatedRequest = async (url, method, body = null, isFormData = false) => {
     try {
@@ -62,19 +66,6 @@ const ChatLayout = ({ username, onLogout, keycloak }) => {
     removeChat
   } = useChatManagement(makeAuthenticatedRequest);
 
-  useEffect(() => {
-    fetchDocuments();
-  }, []);
-
-  const fetchDocuments = async () => {
-    try {
-      const fetchedDocuments = await makeAuthenticatedRequest(`${API_BASE_URL}/document/list`, 'GET');
-      setDocuments(fetchedDocuments);
-    } catch (error) {
-      console.error('Error fetching documents:', error);
-    }
-  };
-
   const toggleTheme = () => {
     setTheme(theme === 'dark' ? 'light' : 'dark');
   };
@@ -85,13 +76,22 @@ const ChatLayout = ({ username, onLogout, keycloak }) => {
 
   const closeUploadModal = () => {
     setIsUploadModalOpen(false);
-    fetchDocuments(); // Refresh the documents list after upload
+  };
+
+  const handleUploadSuccess = () => {
+    setIsSuccessDialogOpen(true);
+    setRefreshDocuments(prev => !prev);
+  };
+
+  const handleUploadError = (message) => {
+    setErrorMessage(message);
+    setIsErrorDialogOpen(true);
   };
 
   const renderContent = () => {
     switch (currentView) {
       case 'documents':
-        return <Documents documents={documents} openUploadModal={openUploadModal} makeAuthenticatedRequest={makeAuthenticatedRequest} />;
+        return <Documents openUploadModal={openUploadModal} makeAuthenticatedRequest={makeAuthenticatedRequest} refreshTrigger={refreshDocuments} />;
       default:
         return <ChatArea chat={chats.find(chat => chat.id === currentChatId)} updateChat={updateChat} makeAuthenticatedRequest={makeAuthenticatedRequest} />;
     }
@@ -127,7 +127,25 @@ const ChatLayout = ({ username, onLogout, keycloak }) => {
         makeAuthenticatedRequest={makeAuthenticatedRequest}
         isOpen={isUploadModalOpen}
         onClose={closeUploadModal}
+        onUploadSuccess={handleUploadSuccess}
+        onUploadError={handleUploadError}
       />
+      <Dialog open={isSuccessDialogOpen} onOpenChange={setIsSuccessDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Upload Successful</DialogTitle>
+          </DialogHeader>
+          <p>Your document has been successfully uploaded.</p>
+        </DialogContent>
+      </Dialog>
+      <Dialog open={isErrorDialogOpen} onOpenChange={setIsErrorDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Upload Error</DialogTitle>
+          </DialogHeader>
+          <p>{errorMessage}</p>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
