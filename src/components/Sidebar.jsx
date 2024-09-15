@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
-import { PlusCircle, Menu, MoreVertical, Check, X } from 'lucide-react';
+import { PlusCircle, Menu, MoreVertical, Check, X, FileText, Upload } from 'lucide-react';
 import { Sheet, SheetContent, SheetTrigger } from './ui/sheet';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "./ui/dropdown-menu";
 
-const Sidebar = ({ chats, currentChatId, setCurrentChatId, addNewChat, handleChatNameEdit, removeChat }) => {
+const Sidebar = ({ chats, currentChatId, setCurrentChatId, addNewChat, handleChatNameEdit, removeChat, setCurrentView, openUploadModal }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [editingChatId, setEditingChatId] = useState(null);
   const [editedTitle, setEditedTitle] = useState('');
@@ -17,6 +17,17 @@ const Sidebar = ({ chats, currentChatId, setCurrentChatId, addNewChat, handleCha
 
   const handleChatSelect = (chatId) => {
     setCurrentChatId(chatId);
+    setCurrentView('chat');
+    setIsMobileMenuOpen(false);
+  };
+
+  const handleDocumentsClick = () => {
+    setCurrentView('documents');
+    setIsMobileMenuOpen(false);
+  };
+
+  const handleUploadClick = () => {
+    openUploadModal();
     setIsMobileMenuOpen(false);
   };
 
@@ -78,6 +89,16 @@ const Sidebar = ({ chats, currentChatId, setCurrentChatId, addNewChat, handleCha
             )}
           </div>
         ))}
+      </div>
+      <div className="mt-4">
+        <Button variant="ghost" className="w-full justify-start mb-2" onClick={handleDocumentsClick}>
+          <FileText className="mr-2 h-4 w-4" />
+          <span>Documents</span>
+        </Button>
+        <Button variant="ghost" className="w-full justify-start" onClick={handleUploadClick}>
+          <Upload className="mr-2 h-4 w-4" />
+          <span>Upload</span>
+        </Button>
       </div>
     </>
   );

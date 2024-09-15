@@ -1,31 +1,42 @@
-import React from 'react';
-import Sidebar from './Sidebar';
-import ChatArea from './ChatArea';
+import React, { useState, useEffect } from 'react';
 import { Button } from './ui/button';
 import { Moon, Sun, LogOut } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import useChatManagement from '../hooks/useChatManagement';
+import Documents from '../pages/Documents';
+import ChatArea from './ChatArea';
+import Sidebar from './Sidebar';
+import DocumentUpload from './DocumentUpload';
+
+const API_BASE_URL = 'http://localhost:8080';
 
 const ChatLayout = ({ username, onLogout, keycloak }) => {
   const { theme, setTheme } = useTheme();
+  const [currentView, setCurrentView] = useState('chat');
+  const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
+  const [documents, setDocuments] = useState([]);
 
-  const makeAuthenticatedRequest = async (url, method, body = null) => {
+  const makeAuthenticatedRequest = async (url, method, body = null, isFormData = false) => {
     try {
-      // Refresh token if it's close to expiration (e.g., less than 30 seconds left)
       const tokenExpiresIn = keycloak.tokenParsed.exp - Math.floor(Date.now() / 1000);
       if (tokenExpiresIn < 30) {
         await keycloak.updateToken(30);
       }
 
       const headers = {
-        'Content-Type': 'application/json',
         'Authorization': `Bearer ${keycloak.token}`,
       };
+
+      if (!isFormData) {
+        headers['Content-Type'] = 'application/json';
+      }
+
       const options = {
         method,
         headers,
-        body: body ? JSON.stringify(body) : null,
+        body: isFormData ? body : (body ? JSON.stringify(body) : null),
       };
+
       const response = await fetch(url, options);
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
@@ -35,7 +46,6 @@ const ChatLayout = ({ username, onLogout, keycloak }) => {
     } catch (error) {
       console.error('Error making authenticated request:', error);
       if (error.message.includes('Token refresh failed')) {
-        // If token refresh fails, redirect to login
         keycloak.login();
       }
       throw error;
@@ -52,8 +62,39 @@ const ChatLayout = ({ username, onLogout, keycloak }) => {
     removeChat
   } = useChatManagement(makeAuthenticatedRequest);
 
+  useEffect(() => {
+    fetchDocuments();
+  }, []);
+
+  const fetchDocuments = async () => {
+    try {
+      const fetchedDocuments = await makeAuthenticatedRequest(`${API_BASE_URL}/document/list`, 'GET');
+      setDocuments(fetchedDocuments);
+    } catch (error) {
+      console.error('Error fetching documents:', error);
+    }
+  };
+
   const toggleTheme = () => {
     setTheme(theme === 'dark' ? 'light' : 'dark');
+  };
+
+  const openUploadModal = () => {
+    setIsUploadModalOpen(true);
+  };
+
+  const closeUploadModal = () => {
+    setIsUploadModalOpen(false);
+    fetchDocuments(); // Refresh the documents list after upload
+  };
+
+  const renderContent = () => {
+    switch (currentView) {
+      case 'documents':
+        return <Documents documents={documents} openUploadModal={openUploadModal} makeAuthenticatedRequest={makeAuthenticatedRequest} />;
+      default:
+        return <ChatArea chat={chats.find(chat => chat.id === currentChatId)} updateChat={updateChat} makeAuthenticatedRequest={makeAuthenticatedRequest} />;
+    }
   };
 
   return (
@@ -65,6 +106,8 @@ const ChatLayout = ({ username, onLogout, keycloak }) => {
         addNewChat={addNewChat}
         handleChatNameEdit={handleChatNameEdit}
         removeChat={removeChat}
+        setCurrentView={setCurrentView}
+        openUploadModal={openUploadModal}
       />
       <main className="flex-1 flex flex-col">
         <div className="p-4 flex justify-between items-center">
@@ -78,12 +121,13 @@ const ChatLayout = ({ username, onLogout, keycloak }) => {
             </Button>
           </div>
         </div>
-        <ChatArea 
-          chat={chats.find(chat => chat.id === currentChatId)} 
-          updateChat={(newMessages) => updateChat(currentChatId, newMessages)} 
-          makeAuthenticatedRequest={makeAuthenticatedRequest}
-        />
+        {renderContent()}
       </main>
+      <DocumentUpload 
+        makeAuthenticatedRequest={makeAuthenticatedRequest}
+        isOpen={isUploadModalOpen}
+        onClose={closeUploadModal}
+      />
     </div>
   );
 };
