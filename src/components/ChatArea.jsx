@@ -7,7 +7,7 @@ import { format } from 'date-fns';
 
 const API_BASE_URL = 'http://localhost:8080';
 
-const ChatArea = ({ chat, updateChat, makeAuthenticatedRequest }) => {
+const ChatArea = ({ chat, updateChat, makeAuthenticatedRequest, speak, botSpeak, transcribe }) => {
   const [isTyping, setIsTyping] = useState(false);
   const [messages, setMessages] = useState([]);
   const [pendingResponses, setPendingResponses] = useState({});
@@ -68,6 +68,7 @@ const ChatArea = ({ chat, updateChat, makeAuthenticatedRequest }) => {
       const finalMessages = [...updatedMessages, botResponse];
       setMessages(finalMessages);
       updateChat(finalMessages);
+      if (botSpeak) await speak(botResponse.content)
     } catch (error) {
       console.error('Error sending message:', error);
       setPendingResponses(prev => ({ ...prev, [chat.id]: false }));
@@ -110,7 +111,7 @@ const ChatArea = ({ chat, updateChat, makeAuthenticatedRequest }) => {
         )}
         <div ref={messagesEndRef} />
       </div>
-      <ChatInput onSendMessage={sendMessage} />
+      <ChatInput onSendMessage={sendMessage} transcribe={transcribe} />
     </div>
   );
 };
