@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
-import { PlusCircle, Menu, MoreVertical, Check, X, FileText, Upload } from 'lucide-react';
+import { PlusCircle, Menu, MoreVertical, Check, X, FileText, Upload, MessageSquareMore } from 'lucide-react';
 import { Sheet, SheetContent, SheetTrigger } from './ui/sheet';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "./ui/dropdown-menu";
+import {INTERVIEW_MODE} from "@/hooks/useInterview.js";
 
-const Sidebar = ({ chats, currentChatId, setCurrentChatId, addNewChat, handleChatNameEdit, removeChat, setCurrentView, openUploadModal }) => {
+const Sidebar = ({ chats, currentChatId, setCurrentChatId, addNewChat, handleChatNameEdit, removeChat, setCurrentView, openUploadModal, setInterviewMode }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [editingChatId, setEditingChatId] = useState(null);
   const [editedTitle, setEditedTitle] = useState('');
@@ -16,6 +17,7 @@ const Sidebar = ({ chats, currentChatId, setCurrentChatId, addNewChat, handleCha
   };
 
   const handleChatSelect = (chatId) => {
+    setInterviewMode(INTERVIEW_MODE.DISABLED)
     setCurrentChatId(chatId);
     setCurrentView('chat');
     setIsMobileMenuOpen(false);
@@ -33,8 +35,14 @@ const Sidebar = ({ chats, currentChatId, setCurrentChatId, addNewChat, handleCha
 
   const ChatList = () => (
     <>
-      <Button onClick={addNewChat} className="mb-4 w-full">
+      <Button onClick={() => {
+          setInterviewMode(INTERVIEW_MODE.DISABLED)
+          addNewChat()
+      }} className="mb-4 w-full">
         <PlusCircle className="mr-2 h-4 w-4" /> New Chat
+      </Button>
+      <Button onClick={() => setInterviewMode(INTERVIEW_MODE.INTERVIEW_QUESTION)} className="mb-4 w-full">
+        <MessageSquareMore className="mr-2 h-4 w-4" /> New Interview
       </Button>
       <div className="flex-1 overflow-y-auto">
         {chats.map((chat) => (

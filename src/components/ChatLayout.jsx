@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Button } from './ui/button';
-import { Moon, Sun, LogOut } from 'lucide-react';
+import {Moon, Sun, LogOut, Volume2, VolumeX} from 'lucide-react';
 import { useTheme } from 'next-themes';
 import useChatManagement from '../hooks/useChatManagement';
 import Documents from '../pages/Documents';
@@ -8,6 +8,9 @@ import ChatArea from './ChatArea';
 import Sidebar from './Sidebar';
 import DocumentUpload from './DocumentUpload';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/dialog';
+import useInterview, {INTERVIEW_MODE} from "@/hooks/useInterview.js";
+import InterviewQuestionArea from "@/components/InterviewQuestionArea.jsx";
+import InterviewConductArea from "@/components/InterviewConductArea.jsx";
 
 const API_BASE_URL = 'http://localhost:8080';
 
@@ -66,6 +69,21 @@ const ChatLayout = ({ username, onLogout, keycloak }) => {
     removeChat
   } = useChatManagement(makeAuthenticatedRequest);
 
+  const {
+    transcribe,
+    speak,
+    question,
+    questionFile,
+    conduct,
+    feedback,
+    botSpeak,
+    setBotSpeak,
+    interviewMode,
+    setInterviewMode,
+    interviewQuestion,
+    setInterviewQuestion
+  } = useInterview()
+
   const toggleTheme = () => {
     setTheme(theme === 'dark' ? 'light' : 'dark');
   };
@@ -88,13 +106,49 @@ const ChatLayout = ({ username, onLogout, keycloak }) => {
     setIsErrorDialogOpen(true);
   };
 
+  let mainPane
   const renderContent = () => {
     switch (currentView) {
       case 'documents':
         return <Documents openUploadModal={openUploadModal} makeAuthenticatedRequest={makeAuthenticatedRequest} refreshTrigger={refreshDocuments} />;
       default:
-        return <ChatArea chat={chats.find(chat => chat.id === currentChatId)} updateChat={updateChat} makeAuthenticatedRequest={makeAuthenticatedRequest} />;
+        switch (interviewMode) {
+          case INTERVIEW_MODE.DISABLED:
+            mainPane = (
+                <ChatArea
+                    chat={chats.find(chat => chat.id === currentChatId)}
+                    updateChat={(newMessages) => updateChat(currentChatId, newMessages)}
+                    makeAuthenticatedRequest={makeAuthenticatedRequest}
+                    speak={speak} botSpeak={botSpeak} transcribe={transcribe}
+                />
+            )
+            break;
+          case INTERVIEW_MODE.INTERVIEW_QUESTION:
+            mainPane = (
+                <InterviewQuestionArea
+                    setInterviewMode={setInterviewMode}
+                    setInterviewQuestion={setInterviewQuestion}
+                    question={question} questionFile={questionFile}
+                />
+            )
+            break;
+          case INTERVIEW_MODE.INTERVIEW_CONDUCT:
+            mainPane = (
+                <InterviewConductArea
+                    interviewQuestion={interviewQuestion}
+                    conduct={conduct} feedback={feedback}
+                    speak={speak} botSpeak={botSpeak} transcribe={transcribe}
+                />
+            )
+            break;
+        }
+        return mainPane;
     }
+  };
+
+  const toggleSpeak = () => {
+    console.log(`Bot Speak: ${!botSpeak}`)
+    setBotSpeak(!botSpeak)
   };
 
   return (
@@ -108,11 +162,15 @@ const ChatLayout = ({ username, onLogout, keycloak }) => {
         removeChat={removeChat}
         setCurrentView={setCurrentView}
         openUploadModal={openUploadModal}
+        setInterviewMode={setInterviewMode}
       />
       <main className="flex-1 flex flex-col">
         <div className="p-4 flex justify-between items-center">
           <span className="font-bold text-center flex-grow">Welcome, {username}!</span>
           <div>
+            <Button variant="ghost" size="icon" onClick={toggleSpeak} className="mr-2">
+              {botSpeak ? <Volume2 className="h-[1.2rem] w-[1.2rem]" /> : <VolumeX className="h-[1.2rem] w-[1.2rem]" />}
+            </Button>
             <Button variant="ghost" size="icon" onClick={toggleTheme} className="mr-2">
               {theme === 'dark' ? <Sun className="h-[1.2rem] w-[1.2rem]" /> : <Moon className="h-[1.2rem] w-[1.2rem]" />}
             </Button>
