@@ -1,34 +1,49 @@
-import React from 'react';
-import Sidebar from './Sidebar';
-import ChatArea from './ChatArea';
+import React, { useState, useEffect } from 'react';
 import { Button } from './ui/button';
 import {Moon, Sun, LogOut, Volume2, VolumeX} from 'lucide-react';
 import { useTheme } from 'next-themes';
 import useChatManagement from '../hooks/useChatManagement';
+import Documents from '../pages/Documents';
+import ChatArea from './ChatArea';
+import Sidebar from './Sidebar';
+import DocumentUpload from './DocumentUpload';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/dialog';
 import useInterview, {INTERVIEW_MODE} from "@/hooks/useInterview.js";
 import InterviewQuestionArea from "@/components/InterviewQuestionArea.jsx";
 import InterviewConductArea from "@/components/InterviewConductArea.jsx";
 
+const API_BASE_URL = 'http://localhost:8080';
+
 const ChatLayout = ({ username, onLogout, keycloak }) => {
   const { theme, setTheme } = useTheme();
+  const [currentView, setCurrentView] = useState('chat');
+  const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
+  const [isSuccessDialogOpen, setIsSuccessDialogOpen] = useState(false);
+  const [isErrorDialogOpen, setIsErrorDialogOpen] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
+  const [refreshDocuments, setRefreshDocuments] = useState(false);
 
-  const makeAuthenticatedRequest = async (url, method, body = null) => {
+  const makeAuthenticatedRequest = async (url, method, body = null, isFormData = false) => {
     try {
-      // Refresh token if it's close to expiration (e.g., less than 30 seconds left)
       const tokenExpiresIn = keycloak.tokenParsed.exp - Math.floor(Date.now() / 1000);
       if (tokenExpiresIn < 30) {
         await keycloak.updateToken(30);
       }
 
       const headers = {
-        'Content-Type': 'application/json',
         'Authorization': `Bearer ${keycloak.token}`,
       };
+
+      if (!isFormData) {
+        headers['Content-Type'] = 'application/json';
+      }
+
       const options = {
         method,
         headers,
-        body: body ? JSON.stringify(body) : null,
+        body: isFormData ? body : (body ? JSON.stringify(body) : null),
       };
+
       const response = await fetch(url, options);
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
@@ -38,7 +53,6 @@ const ChatLayout = ({ username, onLogout, keycloak }) => {
     } catch (error) {
       console.error('Error making authenticated request:', error);
       if (error.message.includes('Token refresh failed')) {
-        // If token refresh fails, redirect to login
         keycloak.login();
       }
       throw error;
@@ -74,42 +88,68 @@ const ChatLayout = ({ username, onLogout, keycloak }) => {
     setTheme(theme === 'dark' ? 'light' : 'dark');
   };
 
+  const openUploadModal = () => {
+    setIsUploadModalOpen(true);
+  };
+
+  const closeUploadModal = () => {
+    setIsUploadModalOpen(false);
+  };
+
+  const handleUploadSuccess = () => {
+    setIsSuccessDialogOpen(true);
+    setRefreshDocuments(prev => !prev);
+  };
+
+  const handleUploadError = (message) => {
+    setErrorMessage(message);
+    setIsErrorDialogOpen(true);
+  };
+
+  let mainPane
+  const renderContent = () => {
+    switch (currentView) {
+      case 'documents':
+        return <Documents openUploadModal={openUploadModal} makeAuthenticatedRequest={makeAuthenticatedRequest} refreshTrigger={refreshDocuments} />;
+      default:
+        switch (interviewMode) {
+          case INTERVIEW_MODE.DISABLED:
+            mainPane = (
+                <ChatArea
+                    chat={chats.find(chat => chat.id === currentChatId)}
+                    updateChat={(newMessages) => updateChat(currentChatId, newMessages)}
+                    makeAuthenticatedRequest={makeAuthenticatedRequest}
+                    speak={speak} botSpeak={botSpeak} transcribe={transcribe}
+                />
+            )
+            break;
+          case INTERVIEW_MODE.INTERVIEW_QUESTION:
+            mainPane = (
+                <InterviewQuestionArea
+                    setInterviewMode={setInterviewMode}
+                    setInterviewQuestion={setInterviewQuestion}
+                    question={question} questionFile={questionFile}
+                />
+            )
+            break;
+          case INTERVIEW_MODE.INTERVIEW_CONDUCT:
+            mainPane = (
+                <InterviewConductArea
+                    interviewQuestion={interviewQuestion}
+                    conduct={conduct} feedback={feedback}
+                    speak={speak} botSpeak={botSpeak} transcribe={transcribe}
+                />
+            )
+            break;
+        }
+        return mainPane;
+    }
+  };
+
   const toggleSpeak = () => {
     console.log(`Bot Speak: ${!botSpeak}`)
     setBotSpeak(!botSpeak)
   };
-
-  let mainPane
-  switch (interviewMode) {
-    case INTERVIEW_MODE.DISABLED:
-      mainPane = (
-          <ChatArea
-              chat={chats.find(chat => chat.id === currentChatId)}
-              updateChat={(newMessages) => updateChat(currentChatId, newMessages)}
-              makeAuthenticatedRequest={makeAuthenticatedRequest}
-              speak={speak} botSpeak={botSpeak} transcribe={transcribe}
-          />
-      )
-      break;
-    case INTERVIEW_MODE.INTERVIEW_QUESTION:
-      mainPane = (
-          <InterviewQuestionArea
-              setInterviewMode={setInterviewMode}
-              setInterviewQuestion={setInterviewQuestion}
-              question={question} questionFile={questionFile}
-          />
-      )
-      break;
-    case INTERVIEW_MODE.INTERVIEW_CONDUCT:
-      mainPane = (
-          <InterviewConductArea
-              interviewQuestion={interviewQuestion}
-              conduct={conduct} feedback={feedback}
-              speak={speak} botSpeak={botSpeak} transcribe={transcribe}
-          />
-      )
-      break;
-  }
 
   return (
     <div className="flex h-screen bg-background text-foreground">
@@ -120,6 +160,8 @@ const ChatLayout = ({ username, onLogout, keycloak }) => {
         addNewChat={addNewChat}
         handleChatNameEdit={handleChatNameEdit}
         removeChat={removeChat}
+        setCurrentView={setCurrentView}
+        openUploadModal={openUploadModal}
         setInterviewMode={setInterviewMode}
       />
       <main className="flex-1 flex flex-col">
@@ -137,8 +179,31 @@ const ChatLayout = ({ username, onLogout, keycloak }) => {
             </Button>
           </div>
         </div>
-        {mainPane}
+        {renderContent()}
       </main>
+      <DocumentUpload 
+        makeAuthenticatedRequest={makeAuthenticatedRequest}
+        isOpen={isUploadModalOpen}
+        onClose={closeUploadModal}
+        onUploadSuccess={handleUploadSuccess}
+        onUploadError={handleUploadError}
+      />
+      <Dialog open={isSuccessDialogOpen} onOpenChange={setIsSuccessDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Upload Successful</DialogTitle>
+          </DialogHeader>
+          <p>Your document has been successfully uploaded.</p>
+        </DialogContent>
+      </Dialog>
+      <Dialog open={isErrorDialogOpen} onOpenChange={setIsErrorDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Upload Error</DialogTitle>
+          </DialogHeader>
+          <p>{errorMessage}</p>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
