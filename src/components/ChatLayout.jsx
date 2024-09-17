@@ -12,8 +12,6 @@ import useInterview, {INTERVIEW_MODE} from "@/hooks/useInterview.js";
 import InterviewQuestionArea from "@/components/InterviewQuestionArea.jsx";
 import InterviewConductArea from "@/components/InterviewConductArea.jsx";
 
-const API_BASE_URL = 'http://localhost:8080';
-
 const ChatLayout = ({ username, onLogout, keycloak }) => {
   const { theme, setTheme } = useTheme();
   const [currentView, setCurrentView] = useState('chat');

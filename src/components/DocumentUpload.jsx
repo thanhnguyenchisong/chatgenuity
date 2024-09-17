@@ -2,8 +2,7 @@ import React, { useState } from 'react';
 import { Button } from './ui/button';
 import { Upload, Loader2 } from 'lucide-react';
 import Modal from './Modal';
-
-const API_BASE_URL = 'http://localhost:8080';
+import { API_HOST } from '../config';
 
 const DocumentUpload = ({ makeAuthenticatedRequest, isOpen, onClose, onUploadSuccess, onUploadError }) => {
   const [file, setFile] = useState(null);
@@ -25,7 +24,7 @@ const DocumentUpload = ({ makeAuthenticatedRequest, isOpen, onClose, onUploadSuc
     formData.append('file', file);
 
     try {
-      await makeAuthenticatedRequest(`${API_BASE_URL}/policy/upload`, 'POST', formData, true);
+      await makeAuthenticatedRequest(`${API_HOST}/policy/upload`, 'POST', formData, true);
       setFile(null);
       setIsUploading(false);
       onClose();

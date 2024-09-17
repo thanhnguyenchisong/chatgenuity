@@ -2,8 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Button } from '../components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../components/ui/table';
 import { Trash2 } from 'lucide-react';
-
-const API_BASE_URL = 'http://localhost:8080';
+import { API_HOST } from '../config';
 
 const Documents = ({ openUploadModal, makeAuthenticatedRequest, refreshTrigger }) => {
   const [documents, setDocuments] = useState([]);
@@ -14,7 +13,7 @@ const Documents = ({ openUploadModal, makeAuthenticatedRequest, refreshTrigger }
 
   const fetchDocuments = async () => {
     try {
-      const fetchedDocuments = await makeAuthenticatedRequest(`${API_BASE_URL}/policy`, 'GET');
+      const fetchedDocuments = await makeAuthenticatedRequest(`${API_HOST}/policy`, 'GET');
       setDocuments(fetchedDocuments);
     } catch (error) {
       console.error('Error fetching documents:', error);
@@ -23,7 +22,7 @@ const Documents = ({ openUploadModal, makeAuthenticatedRequest, refreshTrigger }
 
   const handleDeleteDocument = async (id) => {
     try {
-      await makeAuthenticatedRequest(`${API_BASE_URL}/policy/${id}`, 'DELETE');
+      await makeAuthenticatedRequest(`${API_HOST}/policy/${id}`, 'DELETE');
       fetchDocuments(); // Refresh the document list after deletion
     } catch (error) {
       console.error('Error deleting document:', error);

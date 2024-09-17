@@ -3,6 +3,7 @@ import Keycloak from 'keycloak-js';
 import ChatLayout from '../components/ChatLayout';
 import LoginForm from '../components/LoginForm';
 import { ThemeProvider } from 'next-themes';
+import { KL_HOST, KL_REALM, KL_CLIENT } from '../config';
 
 const Index = () => {
   const [keycloak, setKeycloak] = useState(null);
@@ -10,9 +11,9 @@ const Index = () => {
 
   useEffect(() => {
     const keycloakConfig = {
-      url: 'http://localhost:9000',
-      realm: 'chatbotdev',
-      clientId: 'chatbotclient'
+      url: `${KL_HOST}`,
+      realm: `${KL_REALM}`,
+      clientId: `${KL_CLIENT}`
     };
 
     const keycloak = new Keycloak(keycloakConfig);
