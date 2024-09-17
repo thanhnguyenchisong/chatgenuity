@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
-
-const API_BASE_URL = 'http://localhost:8080';
+import { API_HOST } from '../config';
 
 const useChatManagement = (makeAuthenticatedRequest) => {
   const [chats, setChats] = useState([]);
@@ -12,7 +11,7 @@ const useChatManagement = (makeAuthenticatedRequest) => {
 
   const fetchChats = async () => {
     try {
-      const fetchedChats = await makeAuthenticatedRequest(`${API_BASE_URL}/chat/getChats`, 'GET');
+      const fetchedChats = await makeAuthenticatedRequest(`${API_HOST}/chat/getChats`, 'GET');
       setChats(fetchedChats);
     } catch (error) {
       console.error('Error fetching chats:', error);
@@ -21,7 +20,7 @@ const useChatManagement = (makeAuthenticatedRequest) => {
 
   const addNewChat = async () => {
     try {
-      const newChat = await makeAuthenticatedRequest(`${API_BASE_URL}/chat/create`, 'POST', { name: "New chat" });
+      const newChat = await makeAuthenticatedRequest(`${API_HOST}/chat/create`, 'POST', { name: "New chat" });
       setChats([...chats, newChat]);
       setCurrentChatId(newChat.id);
     } catch (error) {
@@ -37,7 +36,7 @@ const useChatManagement = (makeAuthenticatedRequest) => {
 
   const handleChatNameEdit = async (chatId, newTitle) => {
     try {
-      await makeAuthenticatedRequest(`${API_BASE_URL}/chat/update`, 'PUT', { id: chatId, name: newTitle });
+      await makeAuthenticatedRequest(`${API_HOST}/chat/update`, 'PUT', { id: chatId, name: newTitle });
       setChats(chats.map(chat =>
         chat.id === chatId ? { ...chat, name: newTitle } : chat
       ));
@@ -48,7 +47,7 @@ const useChatManagement = (makeAuthenticatedRequest) => {
 
   const removeChat = async (chatId) => {
     try {
-      await makeAuthenticatedRequest(`${API_BASE_URL}/chat/${chatId}`, 'DELETE');
+      await makeAuthenticatedRequest(`${API_HOST}/chat/${chatId}`, 'DELETE');
       const newChats = chats.filter(chat => chat.id !== chatId);
       setChats(newChats);
       if (currentChatId === chatId) {

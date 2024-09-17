@@ -4,8 +4,7 @@ import ChatInput from './ChatInput';
 import FormattedMessage from './FormattedMessage';
 import { Bot } from 'lucide-react';
 import { format } from 'date-fns';
-
-const API_BASE_URL = 'http://localhost:8080';
+import { API_HOST } from '../config';
 
 const ChatArea = ({ chat, updateChat, makeAuthenticatedRequest, speak, botSpeak, transcribe }) => {
   const [isTyping, setIsTyping] = useState(false);
@@ -38,7 +37,7 @@ const ChatArea = ({ chat, updateChat, makeAuthenticatedRequest, speak, botSpeak,
 
   const fetchMessages = async (chatId) => {
     try {
-      const fetchedMessages = await makeAuthenticatedRequest(`${API_BASE_URL}/message/getMessages?chatID=${chatId}`, 'GET');
+      const fetchedMessages = await makeAuthenticatedRequest(`${API_HOST}/message/getMessages?chatID=${chatId}`, 'GET');
       setMessages(fetchedMessages);
       updateChat(fetchedMessages);
     } catch (error) {
@@ -57,7 +56,7 @@ const ChatArea = ({ chat, updateChat, makeAuthenticatedRequest, speak, botSpeak,
     setPendingResponses(prev => ({ ...prev, [chat.id]: true }));
     
     try {
-      const response = await makeAuthenticatedRequest(`${API_BASE_URL}/chat/send`, 'POST', {
+      const response = await makeAuthenticatedRequest(`${API_HOST}/chat/send`, 'POST', {
         chatID: chat.id,
         content: content
       });

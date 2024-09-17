@@ -1,6 +1,5 @@
 import {useState} from "react";
-
-const API_BASE_URL = 'http://localhost:8800';
+import { INTERVIEW_HOST } from '../config';
 
 export const INTERVIEW_MODE = Object.freeze({
     DISABLED: Symbol("disabled"),
@@ -18,7 +17,7 @@ const useInterview = () => {
             console.log("Start transcribing")
             const form = new FormData()
             form.append("audioFile", audioBlob, "audioFile.weba")
-            const response = await fetch(`${API_BASE_URL}/interview/transcribe`, {
+            const response = await fetch(`${INTERVIEW_HOST}/interview/transcribe`, {
                 method: "POST",
                 body: form
             })
@@ -39,7 +38,7 @@ const useInterview = () => {
     const speak = async (speech, done) => {
         try {
             console.log("Start speaking")
-            const response = await fetch(`${API_BASE_URL}/interview/speak`, {
+            const response = await fetch(`${INTERVIEW_HOST}/interview/speak`, {
                 method: "POST",
                 body: speech
             })
@@ -61,7 +60,7 @@ const useInterview = () => {
 
     const question = async (jobDescription, appender, done) => {
         try {
-            const response = await fetch(`${API_BASE_URL}/interview/question`, {
+            const response = await fetch(`${INTERVIEW_HOST}/interview/question`, {
                 method: "POST",
                 body: jobDescription
             })
@@ -82,7 +81,7 @@ const useInterview = () => {
         try {
             const form = new FormData()
             form.append("jobDescriptionFile", fileBlob, fileName)
-            const response = await fetch(`${API_BASE_URL}/interview/question-file`, {
+            const response = await fetch(`${INTERVIEW_HOST}/interview/question-file`, {
                 method: "POST",
                 body: form
             })
@@ -101,7 +100,7 @@ const useInterview = () => {
 
     const conduct = async (interviewTranscript, interviewQuestion, appender, done) => {
         try {
-            const response = await fetch(`${API_BASE_URL}/interview/conduct`, {
+            const response = await fetch(`${INTERVIEW_HOST}/interview/conduct`, {
                 method: "POST",
                 headers: {
                     "Accept": "*/*",
@@ -124,7 +123,7 @@ const useInterview = () => {
 
     const feedback = async (interviewTranscript, appender, done) => {
         try {
-            const response = await fetch(`${API_BASE_URL}/interview/feedback`, {
+            const response = await fetch(`${INTERVIEW_HOST}/interview/feedback`, {
                 method: "POST",
                 body: interviewTranscript
             })
