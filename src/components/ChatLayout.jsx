@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from './ui/button';
-import { Moon, Sun, LogOut, Volume2, VolumeX } from 'lucide-react';
+import {Moon, Sun, LogOut, Volume2, VolumeX} from 'lucide-react';
 import { useTheme } from 'next-themes';
 import useChatManagement from '../hooks/useChatManagement';
 import Documents from '../pages/Documents';
@@ -8,9 +8,11 @@ import ChatArea from './ChatArea';
 import Sidebar from './Sidebar';
 import DocumentUpload from './DocumentUpload';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/dialog';
-import useInterview, { INTERVIEW_MODE } from "@/hooks/useInterview.js";
+import useInterview, {INTERVIEW_MODE} from "@/hooks/useInterview.js";
 import InterviewQuestionArea from "@/components/InterviewQuestionArea.jsx";
 import InterviewConductArea from "@/components/InterviewConductArea.jsx";
+
+const API_BASE_URL = 'http://localhost:8080';
 
 const ChatLayout = ({ username, onLogout, keycloak }) => {
   const { theme, setTheme } = useTheme();
@@ -82,53 +84,71 @@ const ChatLayout = ({ username, onLogout, keycloak }) => {
     setInterviewQuestion
   } = useInterview()
 
-  const toggleTheme = () => setTheme(theme === 'dark' ? 'light' : 'dark');
-  const openUploadModal = () => setIsUploadModalOpen(true);
-  const closeUploadModal = () => setIsUploadModalOpen(false);
+  const toggleTheme = () => {
+    setTheme(theme === 'dark' ? 'light' : 'dark');
+  };
+
+  const openUploadModal = () => {
+    setIsUploadModalOpen(true);
+  };
+
+  const closeUploadModal = () => {
+    setIsUploadModalOpen(false);
+  };
+
   const handleUploadSuccess = () => {
     setIsSuccessDialogOpen(true);
     setRefreshDocuments(prev => !prev);
   };
+
   const handleUploadError = (message) => {
     setErrorMessage(message);
     setIsErrorDialogOpen(true);
   };
-  const toggleSpeak = () => setBotSpeak(!botSpeak);
 
+  let mainPane
   const renderContent = () => {
-    if (currentView === 'documents') {
-      return <Documents openUploadModal={openUploadModal} makeAuthenticatedRequest={makeAuthenticatedRequest} refreshTrigger={refreshDocuments} />;
-    }
-
-    switch (interviewMode) {
-      case INTERVIEW_MODE.DISABLED:
-        return (
-          <ChatArea
-            chat={chats.find(chat => chat.id === currentChatId)}
-            updateChat={(newMessages) => updateChat(currentChatId, newMessages)}
-            makeAuthenticatedRequest={makeAuthenticatedRequest}
-            speak={speak} botSpeak={botSpeak} transcribe={transcribe}
-          />
-        );
-      case INTERVIEW_MODE.INTERVIEW_QUESTION:
-        return (
-          <InterviewQuestionArea
-            setInterviewMode={setInterviewMode}
-            setInterviewQuestion={setInterviewQuestion}
-            question={question} questionFile={questionFile}
-          />
-        );
-      case INTERVIEW_MODE.INTERVIEW_CONDUCT:
-        return (
-          <InterviewConductArea
-            interviewQuestion={interviewQuestion}
-            conduct={conduct} feedback={feedback}
-            speak={speak} botSpeak={botSpeak} transcribe={transcribe}
-          />
-        );
+    switch (currentView) {
+      case 'documents':
+        return <Documents openUploadModal={openUploadModal} makeAuthenticatedRequest={makeAuthenticatedRequest} refreshTrigger={refreshDocuments} />;
       default:
-        return null;
+        switch (interviewMode) {
+          case INTERVIEW_MODE.DISABLED:
+            mainPane = (
+                <ChatArea
+                    chat={chats.find(chat => chat.id === currentChatId)}
+                    updateChat={(newMessages) => updateChat(currentChatId, newMessages)}
+                    makeAuthenticatedRequest={makeAuthenticatedRequest}
+                    speak={speak} botSpeak={botSpeak} transcribe={transcribe}
+                />
+            )
+            break;
+          case INTERVIEW_MODE.INTERVIEW_QUESTION:
+            mainPane = (
+                <InterviewQuestionArea
+                    setInterviewMode={setInterviewMode}
+                    setInterviewQuestion={setInterviewQuestion}
+                    question={question} questionFile={questionFile}
+                />
+            )
+            break;
+          case INTERVIEW_MODE.INTERVIEW_CONDUCT:
+            mainPane = (
+                <InterviewConductArea
+                    interviewQuestion={interviewQuestion}
+                    conduct={conduct} feedback={feedback}
+                    speak={speak} botSpeak={botSpeak} transcribe={transcribe}
+                />
+            )
+            break;
+        }
+        return mainPane;
     }
+  };
+
+  const toggleSpeak = () => {
+    console.log(`Bot Speak: ${!botSpeak}`)
+    setBotSpeak(!botSpeak)
   };
 
   return (

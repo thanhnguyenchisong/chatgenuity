@@ -4,7 +4,8 @@ import ChatInput from './ChatInput';
 import FormattedMessage from './FormattedMessage';
 import { Bot } from 'lucide-react';
 import { format } from 'date-fns';
-import { API_BASE_URL } from '../config';
+
+const API_BASE_URL = 'http://localhost:8080';
 
 const ChatArea = ({ chat, updateChat, makeAuthenticatedRequest, speak, botSpeak, transcribe }) => {
   const [isTyping, setIsTyping] = useState(false);

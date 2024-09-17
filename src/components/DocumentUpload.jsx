@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import { Button } from './ui/button';
 import { Upload, Loader2 } from 'lucide-react';
 import Modal from './Modal';
-import { API_BASE_URL } from '../config';
+
+const API_BASE_URL = 'http://localhost:8080';
 
 const DocumentUpload = ({ makeAuthenticatedRequest, isOpen, onClose, onUploadSuccess, onUploadError }) => {
   const [file, setFile] = useState(null);

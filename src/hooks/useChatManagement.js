@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import { API_BASE_URL } from '../config';
+
+const API_BASE_URL = 'http://localhost:8080';
 
 const useChatManagement = (makeAuthenticatedRequest) => {
   const [chats, setChats] = useState([]);

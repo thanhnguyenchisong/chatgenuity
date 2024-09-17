@@ -2,7 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { Button } from '../components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../components/ui/table';
 import { Trash2 } from 'lucide-react';
-import { API_BASE_URL } from '../config';
+
+const API_BASE_URL = 'http://localhost:8080';
 
 const Documents = ({ openUploadModal, makeAuthenticatedRequest, refreshTrigger }) => {
   const [documents, setDocuments] = useState([]);
