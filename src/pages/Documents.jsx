@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Button } from '../components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../components/ui/table';
+import { Trash2 } from 'lucide-react';
 
 const API_BASE_URL = 'http://localhost:8080';
 
@@ -20,6 +21,15 @@ const Documents = ({ openUploadModal, makeAuthenticatedRequest, refreshTrigger }
     }
   };
 
+  const handleDeleteDocument = async (id) => {
+    try {
+      await makeAuthenticatedRequest(`${API_BASE_URL}/policy/${id}`, 'DELETE');
+      fetchDocuments(); // Refresh the document list after deletion
+    } catch (error) {
+      console.error('Error deleting document:', error);
+    }
+  };
+
   return (
     <div className="container mx-auto py-8">
       <h1 className="text-2xl font-bold mb-4">Uploaded Documents</h1>
@@ -30,6 +40,7 @@ const Documents = ({ openUploadModal, makeAuthenticatedRequest, refreshTrigger }
             <TableHead>Name</TableHead>
             <TableHead>Type</TableHead>
             <TableHead>Upload Date</TableHead>
+            <TableHead>Actions</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -38,6 +49,16 @@ const Documents = ({ openUploadModal, makeAuthenticatedRequest, refreshTrigger }
               <TableCell>{doc.name}</TableCell>
               <TableCell>{doc.type}</TableCell>
               <TableCell>{new Date(doc.uploadDate).toLocaleString()}</TableCell>
+              <TableCell>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => handleDeleteDocument(doc.id)}
+                  title="Delete document"
+                >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+              </TableCell>
             </TableRow>
           ))}
         </TableBody>
