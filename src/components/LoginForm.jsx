@@ -6,7 +6,7 @@ const LoginForm = ({ onLogin }) => {
   return (
     <Card className="w-[350px]">
       <CardHeader>
-        <CardTitle>Welcome to ChatWhirl</CardTitle>
+        <CardTitle>Welcome to Chat Buddy</CardTitle>
       </CardHeader>
       <CardContent>
         <p>Please log in to continue</p>
